@@ -9,4 +9,5 @@ export const postgresqlProviders: TypeOrmModuleOptions = {
   database: 'librefind',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   synchronize: true,
+  logging: true,
 };
