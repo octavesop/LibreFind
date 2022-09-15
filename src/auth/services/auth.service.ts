@@ -29,7 +29,20 @@ export class AuthService {
     }
   }
 
-  async signIn(request: SignInRequest): Promise<User | HttpException> {
+  async findUserByUserUid(userUid: number): Promise<User> {
+    try {
+      return await this.userRepository.findOne({
+        where: {
+          userUid: userUid,
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new Error();
+    }
+  }
+
+  async signIn(request: SignInRequest): Promise<User> {
     try {
       const userInfo = await this.userRepository.findOne({
         where: {
@@ -42,10 +55,8 @@ export class AuthService {
       }
       return userInfo;
     } catch (error) {
-      if (error.message === '존재하지 않는 사용자입니다.') {
-        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-      }
       this.logger.error(error);
+      throw new Error(error);
     }
   }
 }
