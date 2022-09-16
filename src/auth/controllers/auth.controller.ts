@@ -55,6 +55,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<User> {
     const userInfo = await this.authService.signIn(request);
+  ): Promise<User | HttpException> {
+    const userInfo = await this.authService.signIn(request);
+    if (!userInfo) {
+      throw new Error('로그인에 실패했습니다.');
+    }
     const accessToken = await this.jwtService.signAsync(
       {
         userUid: userInfo.userUid,
@@ -135,6 +140,16 @@ export class AuthController {
   @ApiOperation({ description: '로그아웃' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard('jwt'))
+      { secret: 'secret' },
+    );
+    res.cookie('accesToken', accessToken, {});
+    res.cookie('refreshToken', accessToken, {});
+    return userInfo;
+  }
+
+  @ApiOperation({ description: '로그아웃' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
   @Post('/signOut')
   async signOut(@Res({ passthrough: true }) res: Response): Promise<void> {
     res.clearCookie('accessToken');
