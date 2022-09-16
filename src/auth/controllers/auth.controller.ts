@@ -19,12 +19,24 @@ import { JwtAuthGuard } from '../guards/jwtAuthGuard.guard';
 import { AuthService } from '../services/auth.service';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
+import { ConfigService } from '@nestjs/config';
+import { AccessTokenConfig } from '../configurations/accessToken.config';
+import { AccessTokenCookieConfig } from '../configurations/accessTokenCookie.config';
+import { RefreshTokenCookieConfig } from '../configurations/refreshTokenConfig.config';
+import { RefreshTokenConfig } from '../configurations/refreshToken.config';
 
 @Controller()
 export class AuthController {
   constructor(
+    private readonly configService: ConfigService,
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
+
+    private readonly accessTokenConfig: AccessTokenConfig,
+    private readonly accessTokenCookieConfig: AccessTokenCookieConfig,
+    private readonly refreshTokenConfig: RefreshTokenConfig,
+    private readonly refreshTokenCookieConfig: RefreshTokenCookieConfig,
   ) {}
 
   @ApiOperation({ description: '회원가입' })
@@ -42,24 +54,31 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<User | HttpException> {
     const userInfo = await this.authService.signIn(request);
-    if (!userInfo) {
-      throw new Error('로그인에 실패했습니다.');
-    }
     const accessToken = await this.jwtService.signAsync(
       {
         userUid: userInfo.userUid,
         userId: userInfo.userId,
       },
-      { secret: 'secret' },
+      this.accessTokenConfig.make(),
     );
-    res.cookie('accesToken', accessToken, {});
-    res.cookie('refreshToken', accessToken, {});
+    const refreshToken = await this.jwtService.signAsync(
+      {
+        userUid: userInfo.userUid,
+      },
+      this.refreshTokenConfig.make(),
+    );
+    res.cookie('accessToken', accessToken, this.accessTokenCookieConfig.make());
+    res.cookie(
+      'refreshToken',
+      refreshToken,
+      this.refreshTokenCookieConfig.make(),
+    );
     return userInfo;
   }
 
   @ApiOperation({ description: '로그아웃' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @Post('/signOut')
   async signOut(@Res({ passthrough: true }) res: Response): Promise<void> {
     res.clearCookie('accessToken');
