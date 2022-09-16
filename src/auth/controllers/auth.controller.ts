@@ -84,39 +84,52 @@ export class AuthController {
     @Cookies('refreshToken') rawRefreshTokenValue: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<User> {
-    const rawRefreshToken: {
-      userUid: number;
-      iat: number;
-      exp: number;
-      iss: string;
-    } = await this.jwtService.verifyAsync(
-      rawRefreshTokenValue,
-      this.refreshTokenConfig.make(),
-    );
+    try {
+      const rawRefreshToken: {
+        userUid: number;
+        iat: number;
+        exp: number;
+        iss: string;
+      } = await this.jwtService.verifyAsync(
+        rawRefreshTokenValue,
+        this.refreshTokenConfig.make(),
+      );
 
-    const userInfo = await this.authService.findUserByUserUid(
-      rawRefreshToken.userUid,
-    );
-    const accessToken = await this.jwtService.signAsync(
-      {
-        userUid: userInfo.userUid,
-        userId: userInfo.userId,
-      },
-      this.accessTokenConfig.make(),
-    );
-    const refreshToken = await this.jwtService.signAsync(
-      {
-        userUid: userInfo.userUid,
-      },
-      this.refreshTokenConfig.make(),
-    );
-    res.cookie('accessToken', accessToken, this.accessTokenCookieConfig.make());
-    res.cookie(
-      'refreshToken',
-      refreshToken,
-      this.refreshTokenCookieConfig.make(),
-    );
-    return userInfo;
+      const userInfo = await this.authService.findUserByUserUid(
+        rawRefreshToken.userUid,
+      );
+      const accessToken = await this.jwtService.signAsync(
+        {
+          userUid: userInfo.userUid,
+          userId: userInfo.userId,
+        },
+        this.accessTokenConfig.make(),
+      );
+      const refreshToken = await this.jwtService.signAsync(
+        {
+          userUid: userInfo.userUid,
+        },
+        this.refreshTokenConfig.make(),
+      );
+      res.cookie(
+        'accessToken',
+        accessToken,
+        this.accessTokenCookieConfig.make(),
+      );
+      res.cookie(
+        'refreshToken',
+        refreshToken,
+        this.refreshTokenCookieConfig.make(),
+      );
+      return userInfo;
+    } catch (error) {
+      if ((error.message = 'jwt must be provided')) {
+        throw new HttpException(
+          '토큰이 만료되었거나 존재하지 않습니다. 다시 로그인해주세요.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+    }
   }
 
   @ApiOperation({ description: '로그아웃' })
