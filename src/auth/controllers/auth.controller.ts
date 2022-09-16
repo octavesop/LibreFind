@@ -15,7 +15,6 @@ import { ApiCreatedResponse, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SignInRequest } from '../dto/signInRequest.dto';
 import { SignUpRequest } from '../dto/signUpRequest.dto';
 import { User } from '../entities/user.entity';
-import { JwtAuthGuard } from '../guards/jwtAuthGuard.guard';
 import { AuthService } from '../services/auth.service';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
@@ -25,6 +24,7 @@ import { AccessTokenConfig } from '../configurations/accessToken.config';
 import { AccessTokenCookieConfig } from '../configurations/accessTokenCookie.config';
 import { RefreshTokenCookieConfig } from '../configurations/refreshTokenConfig.config';
 import { RefreshTokenConfig } from '../configurations/refreshToken.config';
+import { Cookies } from '../../decorators/cookies.decorator';
 
 @Controller()
 export class AuthController {
@@ -48,12 +48,55 @@ export class AuthController {
   }
 
   @ApiOperation({ description: '로그인' })
+  @HttpCode(HttpStatus.CREATED)
   @Post('/signIn')
   async signIn(
     @Body() request: SignInRequest,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<User | HttpException> {
+  ): Promise<User> {
     const userInfo = await this.authService.signIn(request);
+    const accessToken = await this.jwtService.signAsync(
+      {
+        userUid: userInfo.userUid,
+        userId: userInfo.userId,
+      },
+      this.accessTokenConfig.make(),
+    );
+    const refreshToken = await this.jwtService.signAsync(
+      {
+        userUid: userInfo.userUid,
+      },
+      this.refreshTokenConfig.make(),
+    );
+    res.cookie('accessToken', accessToken, this.accessTokenCookieConfig.make());
+    res.cookie(
+      'refreshToken',
+      refreshToken,
+      this.refreshTokenCookieConfig.make(),
+    );
+    return userInfo;
+  }
+
+  @ApiOperation({ description: 'accessToken 리프레시' })
+  @HttpCode(HttpStatus.CREATED)
+  @Post('/refresh')
+  async refresh(
+    @Cookies('refreshToken') rawRefreshTokenValue: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<User> {
+    const rawRefreshToken: {
+      userUid: number;
+      iat: number;
+      exp: number;
+      iss: string;
+    } = await this.jwtService.verifyAsync(
+      rawRefreshTokenValue,
+      this.refreshTokenConfig.make(),
+    );
+
+    const userInfo = await this.authService.findUserByUserUid(
+      rawRefreshToken.userUid,
+    );
     const accessToken = await this.jwtService.signAsync(
       {
         userUid: userInfo.userUid,
