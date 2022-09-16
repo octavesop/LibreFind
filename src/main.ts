@@ -1,4 +1,8 @@
-import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Logger,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -32,6 +36,14 @@ async function bootstrap() {
     SwaggerModule.createDocument(app, swaggerDocumentBuilder),
   );
 
+  app.useGlobalPipes(
+    new ValidationPipe({
+      forbidUnknownValues: true,
+      forbidNonWhitelisted: true,
+      disableErrorMessages: false,
+      enableDebugMessages: true,
+    }),
+  );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   await app.listen(
