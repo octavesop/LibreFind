@@ -17,8 +17,4 @@ export class SignUpRequest {
   readonly agreeEssentialTerm: boolean;
   @ApiProperty()
   readonly agreeMarketingSend: boolean;
-
-  set hashedPw(value: string) {
-    this.userPw = value;
-  }
 }

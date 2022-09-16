@@ -16,8 +16,7 @@ export class User {
   @Column({ name: 'user_id', unique: true })
   userId: string;
 
-  // TODO :: response에는 안 들어오게 할 것
-  @Column({ select: false, name: 'user_pw' })
+  @Column({ name: 'user_pw' })
   @Exclude()
   userPw: string;
 
