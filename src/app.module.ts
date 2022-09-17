@@ -1,17 +1,16 @@
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { AccessTokenConfig } from './auth/configurations/accessToken.config';
-import { JwtAuthGuard } from './auth/guards/jwtAuthGuard.guard';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { HttpExceptionFilter } from './filters/httpException.filter';
 import { postgresqlProviders } from './loaders/postgresql.providers';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -24,8 +23,10 @@ import { postgresqlProviders } from './loaders/postgresql.providers';
       signOptions: { expiresIn: '60s' },
     }),
     TypeOrmModule.forRoot(postgresqlProviders),
-    AuthModule,
     PassportModule,
+
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [
