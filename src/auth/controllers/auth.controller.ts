@@ -14,17 +14,17 @@ import {
 import { ApiCreatedResponse, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SignInRequest } from '../dto/signInRequest.dto';
 import { SignUpRequest } from '../dto/signUpRequest.dto';
-import { User } from '../entities/user.entity';
 import { AuthService } from '../services/auth.service';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { AuthGuard } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { AccessTokenConfig } from '../configurations/accessToken.config';
 import { AccessTokenCookieConfig } from '../configurations/accessTokenCookie.config';
 import { RefreshTokenCookieConfig } from '../configurations/refreshTokenConfig.config';
 import { RefreshTokenConfig } from '../configurations/refreshToken.config';
 import { Cookies } from '../../decorators/cookies.decorator';
+import { JwtAuthGuard } from '../guards/jwtAuthGuard.guard';
+import { User } from '../../user/entities/user.entity';
 
 @Controller()
 export class AuthController {
@@ -132,16 +132,6 @@ export class AuthController {
         );
       }
     }
-  }
-
-  @ApiOperation({ description: '로그아웃' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(AuthGuard('jwt'))
-      { secret: 'secret' },
-    );
-    res.cookie('accesToken', accessToken, {});
-    res.cookie('refreshToken', accessToken, {});
-    return userInfo;
   }
 
   @ApiOperation({ description: '로그아웃' })
