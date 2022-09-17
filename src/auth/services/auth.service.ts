@@ -2,6 +2,7 @@ import {
   Body,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   Logger,
 } from '@nestjs/common';
@@ -56,9 +57,16 @@ export class AuthService {
       if (!userInfo) {
         throw new Error('존재하지 않는 사용자입니다.');
       }
-      if (await isHashMatch(userInfo.userPw, request.userPw)) {
+      if (!(await isHashMatch(request.userPw, userInfo.userPw))) {
+        (await this.redisProvider.get('userId'))
+          ? await this.redisProvider.incr('userId')
+          : await this.redisProvider.set('userId', 1);
         throw new Error('비밀번호가 일치하지 않습니다.');
       }
+      if ((await this.redisProvider.get('userId')) > 5) {
+        throw new Error('로그인이 불가능합니다.');
+      }
+      await this.redisProvider.del('userId');
       return userInfo;
     } catch (error) {
       this.logger.error(error);
