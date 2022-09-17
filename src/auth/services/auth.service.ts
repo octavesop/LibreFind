@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SignInRequest } from '../dto/signInRequest.dto';
 import { SignUpRequest } from '../dto/signUpRequest.dto';
-import { User } from '../entities/user.entity';
+import { User } from '../../user/entities/user.entity';
 import { bcryptHash, isHashMatch } from '../utils/hash.util';
 
 @Injectable()
@@ -17,8 +17,12 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    @Inject('RedisProviders')
+    private readonly redisProvider,
   ) {}
   private readonly logger = new Logger(AuthService.name);
+
   async signUp(request: SignUpRequest): Promise<User> {
     try {
       request.userPw = await bcryptHash(request.userPw);
