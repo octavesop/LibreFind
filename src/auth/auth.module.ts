@@ -4,17 +4,19 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './controllers/auth.controller';
 import { AccessTokenConfig } from './configurations/accessToken.config';
-import { User } from './entities/user.entity';
+import { User } from '../user/entities/user.entity';
 import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AccessTokenCookieConfig } from './configurations/accessTokenCookie.config';
 import { RefreshTokenConfig } from './configurations/refreshToken.config';
 import { RefreshTokenCookieConfig } from './configurations/refreshTokenConfig.config';
+import { RedisProviders } from '../loaders/redis.providers';
 
 @Module({
   imports: [PassportModule, TypeOrmModule.forFeature([User])],
   controllers: [AuthController],
   providers: [
+    RedisProviders,
     AuthService,
     AccessTokenConfig,
     AccessTokenCookieConfig,

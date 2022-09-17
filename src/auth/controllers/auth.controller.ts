@@ -48,13 +48,10 @@ export class AuthController {
   }
 
   @ApiOperation({ description: '로그인' })
-  @HttpCode(HttpStatus.CREATED)
   @Post('/signIn')
   async signIn(
     @Body() request: SignInRequest,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<User> {
-    const userInfo = await this.authService.signIn(request);
   ): Promise<User | HttpException> {
     const userInfo = await this.authService.signIn(request);
     if (!userInfo) {

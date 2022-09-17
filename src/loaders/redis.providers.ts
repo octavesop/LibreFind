@@ -1,12 +1,12 @@
 import { Logger } from '@nestjs/common';
 import Redis from 'ioredis';
 
-export const REDIS_CONNECTION_PROVIDER_NAME = 'RedisProviders';
+export const REDIS_PROVIDER = 'RedisProviders';
 export const RedisProviders = {
-  provide: REDIS_CONNECTION_PROVIDER_NAME,
+  provide: REDIS_PROVIDER,
   useFactory: async () => {
-    const logger = new Logger(REDIS_CONNECTION_PROVIDER_NAME);
-    const port = 3306;
+    const logger = new Logger(REDIS_PROVIDER);
+    const port = 6379;
     const host = 'localhost';
     const pw = '0073';
     const redis = new Redis(`redis://:${pw}@${host}:${port}/`);
