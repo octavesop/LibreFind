@@ -1,4 +1,14 @@
-import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Payload } from '../../auth/dto/payload.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwtAuthGuard.guard';
@@ -29,12 +39,36 @@ export class UserController {
     return await this.userService.fetchUser(limit, current);
   }
 
-  @Post('/:userFriendUid')
+  @Get('/friend')
+  async fetchFriends(
+    @UserPayload() userInfo: Payload,
+    @Query('limit') limit: number,
+    @Query('current') current: number,
+  ): Promise<User[]> {
+    return await this.userService.fetchFriends(
+      userInfo.userUid,
+      limit,
+      current,
+    );
+  }
+
+  @HttpCode(HttpStatus.CREATED)
+  @Post('/friend/:userFriendUid')
   async addFriend(
     @UserPayload() userInfo: Payload,
     @Param('userFriendUid') userFriendUid: number,
   ): Promise<void> {
-    console.log(userInfo.userUid);
-    console.log(userFriendUid);
+    await this.userService.addFriend(userInfo.userUid, userFriendUid);
+    return;
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('/friend/:userFriendUid')
+  async deleteFriend(
+    @UserPayload() userInfo: Payload,
+    @Param('userFriendUid') userFriendUid: number,
+  ): Promise<void> {
+    await this.userService.deleteFriend(userInfo.userUid, userFriendUid);
+    return;
   }
 }
