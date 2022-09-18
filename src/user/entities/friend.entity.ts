@@ -6,17 +6,19 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Unique,
 } from 'typeorm';
 
 @Entity({ name: 'FRIEND' })
+@Unique(['userUid', 'userFriendUid', 'relation'])
 export class Friend {
   @PrimaryGeneratedColumn({ name: 'friend_uid' })
   friendUid: number;
 
-  @Column({ name: 'user_uid', unique: true })
+  @Column({ name: 'user_uid' })
   userUid: number;
 
-  @Column({ name: 'user_friend_uid', unique: true })
+  @Column({ name: 'user_friend_uid' })
   userFriendUid: number;
 
   @Column({ name: 'relation', default: 'friend' })
