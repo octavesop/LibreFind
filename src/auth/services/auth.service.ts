@@ -12,6 +12,9 @@ import { SignInRequest } from '../dto/signInRequest.dto';
 import { SignUpRequest } from '../dto/signUpRequest.dto';
 import { User } from '../../user/entities/user.entity';
 import { bcryptHash, isHashMatch } from '../utils/hash.util';
+import { NotExistUserException } from '../../exceptions/notExistUser.exception';
+import { LoginTriedOverFlowException } from '../../exceptions/loginTriedOverflow.exception';
+import { PasswordNotMatchException } from '../../exceptions/passwordNotMatch.exception';
 
 @Injectable()
 export class AuthService {
@@ -55,22 +58,43 @@ export class AuthService {
         },
       });
       if (!userInfo) {
-        throw new Error('존재하지 않는 사용자입니다.');
+        throw new NotExistUserException();
       }
+      const key = `user:${request.userId}`;
+      const failedToLogin = await this.redisProvider.get(key);
+
+      if (failedToLogin > 5) {
+        throw new LoginTriedOverFlowException();
+      }
+
       if (!(await isHashMatch(request.userPw, userInfo.userPw))) {
-        (await this.redisProvider.get('userId'))
-          ? await this.redisProvider.incr('userId')
-          : await this.redisProvider.set('userId', 1);
-        throw new Error('비밀번호가 일치하지 않습니다.');
+        if (failedToLogin) {
+          await this.redisProvider.incr(key);
+          await this.redisProvider.expire(
+            key,
+            60 * 60 * 24, // 24시간. 다시 갱신
+          );
+        } else {
+          await this.redisProvider.set(key, 1, 'EX', 60 * 60 * 24); // 24시간
+        }
+        throw new PasswordNotMatchException(
+          isNaN(failedToLogin) ? 1 : failedToLogin,
+        );
       }
-      if ((await this.redisProvider.get('userId')) > 5) {
-        throw new Error('로그인이 불가능합니다.');
-      }
+
       await this.redisProvider.del('userId');
       return userInfo;
     } catch (error) {
       this.logger.error(error);
-      throw new Error(error);
+      if (error instanceof NotExistUserException) {
+        throw error;
+      }
+      if (error instanceof PasswordNotMatchException) {
+        throw error;
+      }
+      if (error instanceof LoginTriedOverFlowException) {
+        throw error;
+      }
     }
   }
 }

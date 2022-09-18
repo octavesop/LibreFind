@@ -11,11 +11,11 @@ export class RefreshTokenCookieConfig implements CookieOptions {
   readonly sameSite: boolean | 'lax' | 'strict' | 'none';
 
   constructor(private readonly configService: ConfigService) {
-    this.maxAge = 10000000;
-    this.httpOnly = true;
-    this.path = '/';
-    this.secure = false;
-    this.sameSite = false;
+    this.maxAge = this.configService.get<number>('REFRESH_TOKEN_EXPIRES_IN');
+    this.httpOnly = this.configService.get<boolean>('COOKIE_HTTP_ONLY');
+    this.path = this.configService.get<string>('COOKIE_PATH');
+    this.secure = this.configService.get<boolean>('COOKIE_SECURE');
+    this.sameSite = this.configService.get<'lax'>('COOKIE_SAME_SITE');
   }
 
   make(): CookieOptions {

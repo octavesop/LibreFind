@@ -9,7 +9,7 @@ import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AccessTokenCookieConfig } from './configurations/accessTokenCookie.config';
 import { RefreshTokenConfig } from './configurations/refreshToken.config';
-import { RefreshTokenCookieConfig } from './configurations/refreshTokenConfig.config';
+import { RefreshTokenCookieConfig } from './configurations/refreshTokenCookie.config';
 import { RedisProviders } from '../loaders/redis.providers';
 
 @Module({
