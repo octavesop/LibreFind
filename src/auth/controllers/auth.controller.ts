@@ -20,7 +20,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AccessTokenConfig } from '../configurations/accessToken.config';
 import { AccessTokenCookieConfig } from '../configurations/accessTokenCookie.config';
-import { RefreshTokenCookieConfig } from '../configurations/refreshTokenConfig.config';
+import { RefreshTokenCookieConfig } from '../configurations/refreshTokenCookie.config';
 import { RefreshTokenConfig } from '../configurations/refreshToken.config';
 import { Cookies } from '../../decorators/cookies.decorator';
 import { JwtAuthGuard } from '../guards/jwtAuthGuard.guard';
@@ -70,9 +70,13 @@ export class AuthController {
       },
       this.refreshTokenConfig.make(),
     );
-    res.cookie('accessToken', accessToken, this.accessTokenCookieConfig.make());
     res.cookie(
-      'refreshToken',
+      this.configService.get<string>('ACCESS_TOKEN_NAME'),
+      accessToken,
+      this.accessTokenCookieConfig.make(),
+    );
+    res.cookie(
+      this.configService.get<string>('REFRESH_TOKEN_NAME'),
       refreshToken,
       this.refreshTokenCookieConfig.make(),
     );
@@ -114,12 +118,12 @@ export class AuthController {
         this.refreshTokenConfig.make(),
       );
       res.cookie(
-        'accessToken',
+        this.configService.get<string>('ACCESS_TOKEN_NAME'),
         accessToken,
         this.accessTokenCookieConfig.make(),
       );
       res.cookie(
-        'refreshToken',
+        this.configService.get<string>('REFRESH_TOKEN_NAME'),
         refreshToken,
         this.refreshTokenCookieConfig.make(),
       );
@@ -139,8 +143,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('/signOut')
   async signOut(@Res({ passthrough: true }) res: Response): Promise<void> {
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    res.clearCookie(this.configService.get<string>('ACCESS_TOKEN_NAME'));
+    res.clearCookie(this.configService.get<string>('REFRESH_TOKEN_NAME'));
     return;
   }
 }

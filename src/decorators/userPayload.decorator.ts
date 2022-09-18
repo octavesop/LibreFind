@@ -12,11 +12,13 @@ export const UserPayload = createParamDecorator(
     try {
       const jwtService = new JwtService({});
       const request = ctx.switchToHttp().getRequest();
-      const cookie = data ? request.cookies?.['accessToken'] : request.cookies;
+      const cookie = data
+        ? request.cookies?.[process.env.ACCESS_TOKEN_NAME]
+        : request.cookies;
 
       const jwt: Payload = await jwtService.verifyAsync(cookie.accessToken, {
-        issuer: 'string',
-        secret: 'secret',
+        issuer: process.env.ACCESS_TOKEN_ISSUER,
+        secret: process.env.ACCESS_TOKEN_SECRET,
       });
 
       return jwt;
