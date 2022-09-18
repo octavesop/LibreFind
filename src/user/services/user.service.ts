@@ -1,8 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AlreadyExistFriendException } from '../../exceptions/alreadyExistFriend.exception';
+import { NotExistFriendException } from '../../exceptions/notExistFriend.exception';
+import { NotExistUserException } from '../../exceptions/notExistUser.exception';
 import { In, Repository } from 'typeorm';
 import { Friend } from '../entities/friend.entity';
 import { User } from '../entities/user.entity';
+import { CannotBeFriendWithMyselfException } from '../../exceptions/cannotBeFriendWithMyself.exception';
 
 @Injectable()
 export class UserService {
@@ -50,10 +54,10 @@ export class UserService {
         },
       });
       if (!friendUser) {
-        throw new Error('존재하지 않는 사용자입니다.');
+        throw new NotExistUserException();
       }
       if (friendUser.userUid === userUid) {
-        throw new Error('자기 자신은 친구 추가할 수 없습니다.');
+        throw new CannotBeFriendWithMyselfException();
       }
 
       const isFriendExist = await this.friendRepository.find({
@@ -63,15 +67,10 @@ export class UserService {
             userFriendUid: friendUser.userUid,
             relation: 'friend',
           },
-          {
-            userUid: friendUser.userUid,
-            userFriendUid: userUid,
-            relation: 'friend',
-          },
         ],
       });
       if (isFriendExist.length > 0) {
-        throw new Error('이미 존재하는 친구입니다.');
+        throw new AlreadyExistFriendException();
       }
       await this.friendRepository.save({
         friendUid: 0,
@@ -88,7 +87,16 @@ export class UserService {
       return;
     } catch (error) {
       this.logger.error(error);
-      throw new Error(error);
+
+      if (error instanceof NotExistUserException) {
+        throw error;
+      }
+      if (error instanceof CannotBeFriendWithMyselfException) {
+        throw error;
+      }
+      if (error instanceof AlreadyExistFriendException) {
+        throw error;
+      }
     }
   }
 
@@ -109,7 +117,7 @@ export class UserService {
         ],
       });
       if (friendEntity.length < 1) {
-        throw new Error('존재하지 않는 친구입니다.');
+        throw new NotExistFriendException();
       }
       await this.friendRepository.delete(
         friendEntity.map((entity) => entity.friendUid),
@@ -117,7 +125,9 @@ export class UserService {
       return;
     } catch (error) {
       this.logger.error(error);
-      throw new Error(error);
+      if (error instanceof NotExistFriendException) {
+        throw error;
+      }
     }
   }
 }

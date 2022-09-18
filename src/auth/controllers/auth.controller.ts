@@ -25,6 +25,7 @@ import { RefreshTokenConfig } from '../configurations/refreshToken.config';
 import { Cookies } from '../../decorators/cookies.decorator';
 import { JwtAuthGuard } from '../guards/jwtAuthGuard.guard';
 import { User } from '../../user/entities/user.entity';
+import { AccessTokenInvalidException } from '../../exceptions/accessTokenInvalid.exception';
 
 @Controller()
 export class AuthController {
@@ -52,11 +53,8 @@ export class AuthController {
   async signIn(
     @Body() request: SignInRequest,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<User | HttpException> {
+  ): Promise<User> {
     const userInfo = await this.authService.signIn(request);
-    if (!userInfo) {
-      throw new Error('로그인에 실패했습니다.');
-    }
     const accessToken = await this.jwtService.signAsync(
       {
         userUid: userInfo.userUid,
@@ -130,10 +128,7 @@ export class AuthController {
       return userInfo;
     } catch (error) {
       if ((error.message = 'jwt must be provided')) {
-        throw new HttpException(
-          '토큰이 만료되었거나 존재하지 않습니다. 다시 로그인해주세요.',
-          HttpStatus.FORBIDDEN,
-        );
+        throw new AccessTokenInvalidException();
       }
     }
   }
