@@ -1,11 +1,11 @@
 import { Exclude } from 'class-transformer';
 import {
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
 } from 'typeorm';
 
 @Entity({ name: 'USER' })

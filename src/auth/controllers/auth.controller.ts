@@ -55,14 +55,14 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<User> {
     const userInfo = await this.authService.signIn(request);
-    const accessToken = await this.jwtService.signAsync(
+    const accessToken = this.jwtService.sign(
       {
         userUid: userInfo.userUid,
         userId: userInfo.userId,
       },
       this.accessTokenConfig.make(),
     );
-    const refreshToken = await this.jwtService.signAsync(
+    const refreshToken = this.jwtService.sign(
       {
         userUid: userInfo.userUid,
       },
@@ -94,7 +94,7 @@ export class AuthController {
         iat: number;
         exp: number;
         iss: string;
-      } = await this.jwtService.verifyAsync(
+      } = this.jwtService.verify(
         rawRefreshTokenValue,
         this.refreshTokenConfig.make(),
       );
@@ -102,14 +102,14 @@ export class AuthController {
       const userInfo = await this.authService.findUserByUserUid(
         rawRefreshToken.userUid,
       );
-      const accessToken = await this.jwtService.signAsync(
+      const accessToken = this.jwtService.sign(
         {
           userUid: userInfo.userUid,
           userId: userInfo.userId,
         },
         this.accessTokenConfig.make(),
       );
-      const refreshToken = await this.jwtService.signAsync(
+      const refreshToken = this.jwtService.sign(
         {
           userUid: userInfo.userUid,
         },
