@@ -1,5 +1,3 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { response } from 'express';
 import { Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { AuthService } from '../services/auth.service';

@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator';
 
-// TODO
-// class-validator 달기
 export class SignUpRequest {
   @ApiProperty()
   @IsString()

@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 import { AlreadyExistFriendException } from '../../exceptions/alreadyExistFriend.exception';
+import { CannotBeFriendWithMyselfException } from '../../exceptions/cannotBeFriendWithMyself.exception';
 import { NotExistFriendException } from '../../exceptions/notExistFriend.exception';
 import { NotExistUserException } from '../../exceptions/notExistUser.exception';
-import { In, Repository } from 'typeorm';
 import { Friend } from '../entities/friend.entity';
 import { User } from '../entities/user.entity';
-import { CannotBeFriendWithMyselfException } from '../../exceptions/cannotBeFriendWithMyself.exception';
 
 @Injectable()
 export class UserService {
