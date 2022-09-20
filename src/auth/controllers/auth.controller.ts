@@ -1,33 +1,30 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
-  Get,
   HttpCode,
-  HttpException,
   HttpStatus,
   Post,
   Res,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { SignInRequest } from '../dto/signInRequest.dto';
-import { SignUpRequest } from '../dto/signUpRequest.dto';
-import { AuthService } from '../services/auth.service';
-import { Response } from 'express';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
+import { Cookies } from '../../decorators/cookies.decorator';
+import { AccessTokenInvalidException } from '../../exceptions/accessTokenInvalid.exception';
+import { User } from '../../user/entities/user.entity';
 import { AccessTokenConfig } from '../configurations/accessToken.config';
 import { AccessTokenCookieConfig } from '../configurations/accessTokenCookie.config';
-import { RefreshTokenCookieConfig } from '../configurations/refreshTokenCookie.config';
 import { RefreshTokenConfig } from '../configurations/refreshToken.config';
-import { Cookies } from '../../decorators/cookies.decorator';
+import { RefreshTokenCookieConfig } from '../configurations/refreshTokenCookie.config';
+import { SignInRequest } from '../dto/signInRequest.dto';
+import { SignUpRequest } from '../dto/signUpRequest.dto';
 import { JwtAuthGuard } from '../guards/jwtAuthGuard.guard';
-import { User } from '../../user/entities/user.entity';
-import { AccessTokenInvalidException } from '../../exceptions/accessTokenInvalid.exception';
+import { AuthService } from '../services/auth.service';
 
-@Controller()
+@ApiTags('Auth')
+@Controller('/auth')
 export class AuthController {
   constructor(
     private readonly configService: ConfigService,
