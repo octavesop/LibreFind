@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { AxiosError } from 'axios';
 import { fetchBookListBySearchKeyword } from '../utilities/axios.utils';
+import { addBookInfo } from '../utilities/es.utils';
 
 @Injectable()
 export class BookService {
@@ -23,12 +25,15 @@ export class BookService {
         }),
       };
     } catch (error) {
+      if (error instanceof AxiosError) {
+        console.log(error);
+      }
       this.logger.error(error);
       throw new Error(error);
     }
   }
 
   async addBookReview(bookId: string): Promise<any> {
-    throw new Error('Method not implemented.');
+    return await addBookInfo();
   }
 }
