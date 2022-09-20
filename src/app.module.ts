@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
+import { BookModule } from './book/book.module';
 import { HttpExceptionFilter } from './filters/httpException.filter';
 import { postgresqlProviders } from './loaders/postgresql.providers';
 import { UserModule } from './user/user.module';
@@ -23,6 +24,7 @@ import { UserModule } from './user/user.module';
     PassportModule,
 
     AuthModule,
+    BookModule,
     UserModule,
   ],
   controllers: [AppController],
