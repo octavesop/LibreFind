@@ -4,12 +4,19 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserMappingBooks } from '../../book/entities/userMappingBooks.entity';
+import { Friend } from './friend.entity';
 
 @Entity({ name: 'USER' })
 export class User {
+  constructor(userUid: number) {
+    this.userUid = userUid;
+  }
   @PrimaryGeneratedColumn({ name: 'user_uid' })
   userUid: number;
 
@@ -28,7 +35,6 @@ export class User {
 
   @Column({ name: 'user_email', unique: true })
   userEmail: string;
-
   @Column({ name: 'agree_essential_term', default: false })
   agreeEssentialTerm: boolean;
 
@@ -49,4 +55,15 @@ export class User {
 
   @DeleteDateColumn({ name: 'deleted_at', default: null })
   deletedAt: Date;
+
+  @OneToMany(
+    () => UserMappingBooks,
+    (userMappingBooks) => userMappingBooks.user,
+  )
+  @JoinColumn({ name: 'user_mapping_books_id' })
+  userMappingBooks: UserMappingBooks[];
+
+  @OneToMany(() => Friend, (friend) => friend.userUid)
+  @JoinColumn({ name: 'user_mapping_books_id' })
+  friendUid: Friend[];
 }

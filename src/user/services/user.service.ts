@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Equal, In, Repository } from 'typeorm';
 import { AlreadyExistFriendException } from '../../exceptions/alreadyExistFriend.exception';
 import { CannotBeFriendWithMyselfException } from '../../exceptions/cannotBeFriendWithMyself.exception';
 import { NotExistFriendException } from '../../exceptions/notExistFriend.exception';
@@ -33,10 +33,8 @@ export class UserService {
     limit: number,
     current: number,
   ): Promise<User[]> {
-    const friendEntityList = await this.friendRepository.find({
-      where: {
-        userUid: userUid,
-      },
+    const friendEntityList = await this.friendRepository.findBy({
+      userUid: Equal(userUid),
     });
     const friendResult = await this.userRepository.find({
       where: {
@@ -50,7 +48,7 @@ export class UserService {
     try {
       const friendUser = await this.userRepository.findOne({
         where: {
-          userUid: userFriendUid,
+          userUid: Equal(userFriendUid),
         },
       });
       if (!friendUser) {
@@ -63,7 +61,7 @@ export class UserService {
       const isFriendExist = await this.friendRepository.find({
         where: [
           {
-            userUid: userUid,
+            userUid: Equal(userUid),
             userFriendUid: friendUser.userUid,
             relation: 'friend',
           },
@@ -72,18 +70,10 @@ export class UserService {
       if (isFriendExist.length > 0) {
         throw new AlreadyExistFriendException();
       }
-      await this.friendRepository.save({
-        friendUid: 0,
-        userUid: userUid,
-        userFriendUid: friendUser.userUid,
-        relation: 'friend',
-      });
-      await this.friendRepository.save({
-        friendUid: 0,
-        userUid: friendUser.userUid,
-        userFriendUid: userUid,
-        relation: 'friend',
-      });
+      await this.friendRepository.save([
+        new Friend(userUid, userFriendUid, 'friend'),
+        new Friend(userFriendUid, userUid, 'friend'),
+      ]);
       return;
     } catch (error) {
       this.logger.error(error);
@@ -105,13 +95,13 @@ export class UserService {
       const friendEntity = await this.friendRepository.find({
         where: [
           {
-            userUid: userUid,
-            userFriendUid: userFriendUid,
+            userUid: Equal(userUid),
+            userFriendUid: Equal(userFriendUid),
             relation: 'friend',
           },
           {
-            userUid: userFriendUid,
-            userFriendUid: userUid,
+            userUid: Equal(userFriendUid),
+            userFriendUid: Equal(userUid),
             relation: 'friend',
           },
         ],
