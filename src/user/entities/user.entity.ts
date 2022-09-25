@@ -9,8 +9,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserMappingBooks } from '../../book/entities/userMappingBooks.entity';
 import { Friend } from './friend.entity';
-import { UserMappingBooks } from './userMappingBooks.entity';
 
 @Entity({ name: 'USER' })
 export class User {

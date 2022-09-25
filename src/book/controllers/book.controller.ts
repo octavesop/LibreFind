@@ -1,5 +1,16 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Payload } from '../../auth/dto/payload.dto';
+import { UserPayload } from '../../decorators/userPayload.decorator';
+import { BookRequest } from '../dto/bookRequest.dto';
 import { BookService } from '../services/book.service';
 
 @ApiTags('Book')
@@ -14,8 +25,22 @@ export class BookController {
     return await this.bookService.fetchBookListBySearchKeyword(searchKeyword);
   }
 
-  @Post('/:bookId')
-  async addBookReview(@Param('bookId') bookId: string): Promise<any> {
-    return await this.bookService.addBookReview(bookId);
+  @Post('/')
+  async addBookReview(
+    @Body() request: BookRequest,
+    @UserPayload() userInfo: Payload,
+  ): Promise<any> {
+    return await this.bookService.addBookReview(request, userInfo.userUid);
+  }
+
+  @Delete('/:userMappingBooksUid')
+  async deleteBookReview(
+    @Param('userMappingBooksUid') userMappingBooksUid: number,
+    @UserPayload() userInfo: Payload,
+  ): Promise<void> {
+    return await this.bookService.deleteBookReview(
+      userMappingBooksUid,
+      userInfo.userUid,
+    );
   }
 }

@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity({ name: 'USER_MAPPING_BOOKS' })
 export class UserMappingBooks {
@@ -26,8 +26,8 @@ export class UserMappingBooks {
   @Column({ name: 'rate' })
   rate: number;
 
-  @Column('int', { name: 'emotion', array: true })
-  emotion: number[];
+  @Column('text', { name: 'emotion', array: true })
+  emotion: string[];
 
   @CreateDateColumn({ name: 'created_at', default: new Date() })
   createdAt: Date;
