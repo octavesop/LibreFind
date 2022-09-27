@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BadgeMappingUser } from '../../badge/entities/badge.entity';
 import { UserMappingBooks } from '../../book/entities/userMappingBooks.entity';
 import { Friend } from './friend.entity';
 
@@ -66,4 +67,11 @@ export class User {
   @OneToMany(() => Friend, (friend) => friend.userUid)
   @JoinColumn({ name: 'user_mapping_books_id' })
   friendUid: Friend[];
+
+  @OneToMany(
+    () => BadgeMappingUser,
+    (BadgeMappingUser) => BadgeMappingUser.userUid,
+  )
+  @JoinColumn({ name: 'badge_mapping_user_uid' })
+  badgeMappingUserUid: BadgeMappingUser[];
 }
