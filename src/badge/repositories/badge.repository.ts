@@ -13,4 +13,8 @@ export class BadgeRepository {
   async findAll(): Promise<Badge[]> {
     return await this.badgeModel.find();
   }
+
+  async findAllByUserUid(userUid: number): Promise<Badge[]> {
+    return await this.badgeModel.find({ user: userUid });
+  }
 }

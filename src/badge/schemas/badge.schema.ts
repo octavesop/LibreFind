@@ -8,8 +8,11 @@ export class Badge {
   @Prop({ type: SchemaTypes.ObjectId })
   id: Types.ObjectId;
 
-  @Prop({ required: true, unique: true })
-  age: number;
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ default: new Date() })
+  createdAt: Date;
 }
 
 export const BadgeSchema = SchemaFactory.createForClass(Badge);
