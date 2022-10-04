@@ -6,7 +6,7 @@ import { User } from '../../user/entities/user.entity';
 import { BookRequest } from '../dto/bookRequest.dto';
 import { UserMappingBooks } from '../entities/UserMappingBooks.entity';
 import { fetchBookListBySearchKeyword } from '../utilities/axios.utils';
-import { addBookInfo } from '../utilities/es.utils';
+import { addBookInfo, fetchBookInfo } from '../utilities/es.utils';
 
 @Injectable()
 export class BookService {
@@ -16,7 +16,7 @@ export class BookService {
   ) {}
 
   private readonly logger = new Logger(BookService.name);
-  async fetchBookListBySearchKeyword(searchKeyword: string) {
+  async fetchBookListBySearchKeyword(searchKeyword: string): Promise<any> {
     try {
       const data = await fetchBookListBySearchKeyword(searchKeyword);
       return {
@@ -38,6 +38,15 @@ export class BookService {
       if (error instanceof AxiosError) {
         console.log(error);
       }
+      this.logger.error(error);
+      throw new Error(error);
+    }
+  }
+
+  async fetchBestRank(): Promise<any> {
+    try {
+      return await fetchBookInfo();
+    } catch (error) {
       this.logger.error(error);
       throw new Error(error);
     }
