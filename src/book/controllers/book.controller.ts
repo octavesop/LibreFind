@@ -25,6 +25,11 @@ export class BookController {
     return await this.bookService.fetchBookListBySearchKeyword(searchKeyword);
   }
 
+  @Get('/rank/fetchBestRank')
+  async fetchBestRank(): Promise<any> {
+    return await this.bookService.fetchBestRank();
+  }
+
   @Post('/')
   async addBookReview(
     @Body() request: BookRequest,
