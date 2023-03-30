@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -30,7 +31,7 @@ import { UserModule } from './user/user.module';
         username: configService.get('POSTGRESQL_USERNAME'),
         password: configService.get('POSTGRESQL_PASSWORD'),
         database: configService.get('POSTGRESQL_DATABASE'),
-        entities: [__dirname + './**/*.entity{.ts,.js}'],
+        entities: [join(__dirname, '**', '*.entity.{ts,js}')],
         synchronize:
           configService.get('NODE_ENV') === 'development' ? true : false,
         logging: true,
