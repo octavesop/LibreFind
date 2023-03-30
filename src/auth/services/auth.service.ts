@@ -1,8 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotExistUserException } from 'src/exceptions/notExistUser.exception';
 import { Repository } from 'typeorm';
+import { AlreadyExistUserException } from '../../exceptions/alreadyExistUser.exception';
 import { LoginTriedOverFlowException } from '../../exceptions/loginTriedOverflow.exception';
-import { NotExistUserException } from '../../exceptions/notExistUser.exception';
 import { PasswordNotMatchException } from '../../exceptions/passwordNotMatch.exception';
 import { User } from '../../user/entities/user.entity';
 import { SignInRequest } from '../dto/signInRequest.dto';
@@ -22,24 +23,42 @@ export class AuthService {
 
   async signUp(request: SignUpRequest): Promise<User> {
     try {
-      request.userPw = await bcryptHash(request.userPw);
-      return await this.userRepository.save(request);
+      const isIdExist = await this.userRepository.findOne({
+        where: {
+          userId: request.userId,
+        },
+      });
+
+      if (isIdExist) {
+        throw new AlreadyExistUserException(request.userId);
+      }
+
+      return await this.userRepository.save({
+        ...request,
+        userPw: await bcryptHash(request.userPw),
+      });
     } catch (error) {
       this.logger.error(error);
-      throw new Error(error);
+      throw error;
     }
   }
 
   async findUserByUserUid(userUid: number): Promise<User> {
     try {
-      return await this.userRepository.findOne({
+      const foundUser = await this.userRepository.findOne({
         where: {
           userUid: userUid,
         },
       });
+
+      if (!foundUser) {
+        throw new NotExistUserException();
+      }
+
+      return foundUser;
     } catch (error) {
       this.logger.error(error);
-      throw new Error();
+      throw error;
     }
   }
 
@@ -50,44 +69,46 @@ export class AuthService {
           userId: request.userId,
         },
       });
+
       if (!userInfo) {
         throw new NotExistUserException();
       }
-      const key = `user:${request.userId}`;
-      const failedToLogin = await this.redisProvider.get(key);
 
-      if (failedToLogin > 5) {
+      const failedCount = await this.#fetchFailedLoginCount(request.userId);
+
+      if (failedCount > 5) {
         throw new LoginTriedOverFlowException();
       }
 
       if (!(await isHashMatch(request.userPw, userInfo.userPw))) {
-        if (failedToLogin) {
-          await this.redisProvider.incr(key);
-          await this.redisProvider.expire(
-            key,
-            60 * 60 * 24, // 24시간. 다시 갱신
-          );
-        } else {
-          await this.redisProvider.set(key, 1, 'EX', 60 * 60 * 24); // 24시간
-        }
-        throw new PasswordNotMatchException(
-          isNaN(failedToLogin) ? 1 : failedToLogin,
-        );
+        await this.#increaseFailedLoginCount(request.userId);
+        throw new PasswordNotMatchException(failedCount);
       }
 
       await this.redisProvider.del('userId');
       return userInfo;
     } catch (error) {
       this.logger.error(error);
-      if (error instanceof NotExistUserException) {
-        throw error;
-      }
-      if (error instanceof PasswordNotMatchException) {
-        throw error;
-      }
-      if (error instanceof LoginTriedOverFlowException) {
-        throw error;
-      }
+      throw error;
     }
+  }
+
+  async #fetchFailedLoginCount(userId: string): Promise<number> {
+    const key = `user:${userId}`;
+    const failedToLogin = await this.redisProvider.get(key);
+    if (!failedToLogin) {
+      await this.redisProvider.set(key, 0, 'EX', 60 * 60 * 24); // 24시간
+    }
+    return failedToLogin ?? 0;
+  }
+
+  async #increaseFailedLoginCount(userId: string): Promise<void> {
+    const key = `user:${userId}`;
+    await this.redisProvider.incr(key);
+    await this.redisProvider.expire(
+      key,
+      60 * 60 * 24, // 24시간. 다시 갱신
+    );
+    return;
   }
 }
