@@ -1,5 +1,5 @@
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -12,7 +12,6 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { BadgeModule } from './badge/badge.module';
 import { BookModule } from './book/book.module';
 import { HttpExceptionFilter } from './filters/httpException.filter';
-import { postgresqlProviders } from './loaders/postgresql.providers';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -22,7 +21,25 @@ import { UserModule } from './user/user.module';
       envFilePath: '.development.env',
     }),
     JwtModule.register({}),
-    TypeOrmModule.forRoot(postgresqlProviders),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('POSTGRESQL_HOST'),
+        port: configService.get('POSTGRESQL_PORT'),
+        username: configService.get('POSTGRESQL_USERNAME'),
+        password: configService.get('POSTGRESQL_PASSWORD'),
+        database: configService.get('POSTGRESQL_DATABASE'),
+        entities: [__dirname + './**/*.entity{.ts,.js}'],
+        synchronize:
+          configService.get('NODE_ENV') === 'development' ? true : false,
+        logging: true,
+        extra: {
+          connectionLimit: 16,
+        },
+      }),
+      inject: [ConfigService],
+    }),
     MongooseModule.forRoot(process.env.MONGODB_URL, {}),
     PassportModule,
 

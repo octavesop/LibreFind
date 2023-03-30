@@ -1,14 +1,15 @@
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 
 export const REDIS_PROVIDER = 'RedisProviders';
 export const RedisProviders = {
   provide: REDIS_PROVIDER,
-  useFactory: async () => {
+  useFactory: async (configService: ConfigService) => {
     const logger = new Logger(REDIS_PROVIDER);
-    const port = 6379;
-    const host = 'localhost';
-    const pw = '0073';
+    const port = configService.get('REDIS_PORT');
+    const host = configService.get('REDIS_HOST');
+    const pw = configService.get('REDIS_PASSWORD');
     const redis = new Redis(`redis://:${pw}@${host}:${port}/`);
 
     redis.on('connect', () => {
@@ -25,5 +26,5 @@ export const RedisProviders = {
 
     return redis;
   },
-  inject: [],
+  inject: [ConfigService],
 };

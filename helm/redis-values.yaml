@@ -1,0 +1,7 @@
+# helm repo add bitnami https://charts.bitnami.com/bitnami
+# helm repo update
+# helm install redis -f /helm/redis-values.yaml bitnami/redis
+# kubectl port-forward --namespace default svc/redis-master 6379:6379
+global:
+  redis:
+    password: '0073'
