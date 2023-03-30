@@ -47,10 +47,10 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   await app.listen(
-    configService.get<number>('PORT'),
-    configService.get<string>('HOST'),
+    configService.get('PORT'),
+    configService.get('HOST'),
     async () => {
-      logger.debug(
+      logger.log(
         `Application successfully started on ${await app.getUrl()} on ${configService.get<string>(
           'NODE_ENV',
         )}`,

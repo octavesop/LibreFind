@@ -1,0 +1,11 @@
+# helm repo add bitnami https://charts.bitnami.com/bitnami
+# helm repo update
+# helm install mongodb -f ./helm/mongo-values.yaml bitnami/mongodb
+# kubectl port-forward --namespace default svc/mongodb 27017:27017
+auth:
+  enabled: true
+  rootUser: root
+  rootPassword: root
+  usernames: ['user']
+  passwords: ['0073']
+  databases: ['librefind']
