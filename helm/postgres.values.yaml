@@ -1,9 +1,11 @@
 # helm repo add bitnami https://charts.bitnami.com/bitnami
 # helm repo update
-# helm install my-postgres -f ./helm/postgres.values.yaml bitnami/postgresql
-# kubectl port-forward --namespace default svc/my-postgres-postgresql 5432:5432 --address='0.0.0.0'
-auth:
-  enablePostgresUser: true
-  postgresPassword: '0073'
-  database: 'librefind'
-  architecture: standalone
+# helm install postgresql -f ./helm/postgres.values.yaml bitnami/postgresql
+# kubectl port-forward --namespace default svc/postgresql 5432:5432
+global:
+  postgresql:
+    auth:
+      postgresPassword: '0073'
+      username: 'user'
+      password: '0073'
+      database: 'librefind'
