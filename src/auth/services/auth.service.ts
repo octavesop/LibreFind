@@ -50,44 +50,46 @@ export class AuthService {
           userId: request.userId,
         },
       });
+
       if (!userInfo) {
         throw new NotExistUserException();
       }
-      const key = `user:${request.userId}`;
-      const failedToLogin = await this.redisProvider.get(key);
 
-      if (failedToLogin > 5) {
+      const failedCount = await this.#fetchFailedLoginCount(request.userId);
+
+      if (failedCount > 5) {
         throw new LoginTriedOverFlowException();
       }
 
       if (!(await isHashMatch(request.userPw, userInfo.userPw))) {
-        if (failedToLogin) {
-          await this.redisProvider.incr(key);
-          await this.redisProvider.expire(
-            key,
-            60 * 60 * 24, // 24시간. 다시 갱신
-          );
-        } else {
-          await this.redisProvider.set(key, 1, 'EX', 60 * 60 * 24); // 24시간
-        }
-        throw new PasswordNotMatchException(
-          isNaN(failedToLogin) ? 1 : failedToLogin,
-        );
+        await this.#increaseFailedLoginCount(request.userId);
+        throw new PasswordNotMatchException(failedCount);
       }
 
       await this.redisProvider.del('userId');
       return userInfo;
     } catch (error) {
       this.logger.error(error);
-      if (error instanceof NotExistUserException) {
-        throw error;
-      }
-      if (error instanceof PasswordNotMatchException) {
-        throw error;
-      }
-      if (error instanceof LoginTriedOverFlowException) {
-        throw error;
-      }
+      throw error;
     }
+  }
+
+  async #fetchFailedLoginCount(userId: string): Promise<number> {
+    const key = `user:${userId}`;
+    const failedToLogin = await this.redisProvider.get(key);
+    if (!failedToLogin) {
+      await this.redisProvider.set(key, 0, 'EX', 60 * 60 * 24); // 24시간
+    }
+    return failedToLogin ?? 0;
+  }
+
+  async #increaseFailedLoginCount(userId: string): Promise<void> {
+    const key = `user:${userId}`;
+    await this.redisProvider.incr(key);
+    await this.redisProvider.expire(
+      key,
+      60 * 60 * 24, // 24시간. 다시 갱신
+    );
+    return;
   }
 }
