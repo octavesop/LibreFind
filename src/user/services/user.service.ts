@@ -120,4 +120,20 @@ export class UserService {
       }
     }
   }
+
+  async IsUserExist(userId: string): Promise<{ result: boolean }> {
+    try {
+      const result = await this.userRepository.count({
+        where: {
+          userId: userId,
+        },
+      });
+      return {
+        result: Boolean(result),
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
 }

@@ -1,8 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotExistUserException } from 'src/exceptions/notExistUser.exception';
 import { Repository } from 'typeorm';
+import { AlreadyExistUserException } from '../../exceptions/alreadyExistUser.exception';
 import { LoginTriedOverFlowException } from '../../exceptions/loginTriedOverflow.exception';
-import { NotExistUserException } from '../../exceptions/notExistUser.exception';
 import { PasswordNotMatchException } from '../../exceptions/passwordNotMatch.exception';
 import { User } from '../../user/entities/user.entity';
 import { SignInRequest } from '../dto/signInRequest.dto';
@@ -22,24 +23,42 @@ export class AuthService {
 
   async signUp(request: SignUpRequest): Promise<User> {
     try {
-      request.userPw = await bcryptHash(request.userPw);
-      return await this.userRepository.save(request);
+      const isIdExist = await this.userRepository.findOne({
+        where: {
+          userId: request.userId,
+        },
+      });
+
+      if (isIdExist) {
+        throw new AlreadyExistUserException(request.userId);
+      }
+
+      return await this.userRepository.save({
+        ...request,
+        userPw: await bcryptHash(request.userPw),
+      });
     } catch (error) {
       this.logger.error(error);
-      throw new Error(error);
+      throw error;
     }
   }
 
   async findUserByUserUid(userUid: number): Promise<User> {
     try {
-      return await this.userRepository.findOne({
+      const foundUser = await this.userRepository.findOne({
         where: {
           userUid: userUid,
         },
       });
+
+      if (!foundUser) {
+        throw new NotExistUserException();
+      }
+
+      return foundUser;
     } catch (error) {
       this.logger.error(error);
-      throw new Error();
+      throw error;
     }
   }
 
