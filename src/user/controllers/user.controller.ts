@@ -10,18 +10,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwtAuthGuard.guard';
 import { Payload } from '../../auth/dto/payload.dto';
-import { JwtAuthGuard } from '../../auth/guards/jwtAuthGuard.guard';
 import { UserPayload } from '../../decorators/userPayload.decorator';
 import { User } from '../entities/user.entity';
 import { UserService } from '../services/user.service';
 
 @ApiTags('User')
-@UseGuards(JwtAuthGuard)
 @Controller('/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ description: '모든 사용자 가져오기' })
   @ApiQuery({
     name: 'limit',
@@ -39,6 +39,15 @@ export class UserController {
     return await this.userService.fetchUser(limit, current);
   }
 
+  @ApiOperation({ description: '사용할 아이디가 중복인지 검증합니다.' })
+  @Get('/duplicate')
+  async fetchUserDuplicated(
+    @Query('userId') userId: string,
+  ): Promise<{ result: boolean }> {
+    return await this.userService.IsUserExist(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('/friend')
   async fetchFriends(
     @UserPayload() userInfo: Payload,
@@ -52,6 +61,7 @@ export class UserController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @Post('/friend/:userFriendUid')
   async addFriend(
@@ -62,6 +72,7 @@ export class UserController {
     return;
   }
 
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/friend/:userFriendUid')
   async deleteFriend(
