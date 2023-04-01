@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { S3ImageUploadHelper } from 'src/user/helper/s3ImageUploader.helper';
+import { S3ImageUploadHelper } from 'src/loaders/s3ImageUploader.helper';
 import { User } from '../user/entities/user.entity';
 import { AccessTokenConfig } from './configurations/accessToken.config';
 import { AccessTokenCookieConfig } from './configurations/accessTokenCookie.config';
