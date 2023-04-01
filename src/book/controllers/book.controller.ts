@@ -18,6 +18,8 @@ import { BookService } from '../services/book.service';
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 
+  // TODO
+  // 페이지네이션 추가
   @Get('/')
   async fetchBookListBySearchKeyword(
     @Query('searchKeyword') searchKeyword: string,
@@ -25,7 +27,20 @@ export class BookController {
     return await this.bookService.fetchBookListBySearchKeyword(searchKeyword);
   }
 
+  @Get('/rank/fetchBestRank')
+  async fetchBestRank(): Promise<any> {
+    return await this.bookService.fetchBestRank();
+  }
+
   @Post('/')
+  async addBook(
+    @Body() request: BookRequest,
+    @UserPayload() userInfo: Payload,
+  ): Promise<any> {
+    return await this.bookService.addBookReview(request, userInfo.userUid);
+  }
+
+  @Post('/review')
   async addBookReview(
     @Body() request: BookRequest,
     @UserPayload() userInfo: Payload,

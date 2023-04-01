@@ -1,0 +1,15 @@
+# helm repo add bitnami https://charts.bitnami.com/bitnami
+# helm repo update
+# helm install elasticsearch -f /helm/elastic-values.yaml bitnami/elasticsearch
+# kubectl port-forward --namespace default svc/elasticsearch 9200:9200
+
+# 설치 이후 적절한 인덱스를 생성한다. 다음 REST API로 생성 가능하다.
+# PUT {host}/{indexName} (참고 url: https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html)
+
+global:
+  elasticsearch:
+    service:
+      name: elasticsearch
+      ports:
+        restAPI: 9200
+  kibanaEnabled: false
