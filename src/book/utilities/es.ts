@@ -19,11 +19,8 @@ export const fetchBookInfo = async () => {
 export const addBookInfo = async (request: BookRequest) => {
   const logger = new Logger(addBookInfo.name);
   try {
-    const { data } = await axios.put(
-      process.env.ES_URL + '/_doc' + '/247365887',
-      request,
-    );
-    return data;
+    await axios.put(process.env.ES_URL + '/_doc' + '/247365887', request);
+    return;
   } catch (error) {
     logger.error(error);
     throw new Error(error);

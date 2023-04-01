@@ -4,9 +4,10 @@ import axios, { AxiosError } from 'axios';
 import { Equal, Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { BookRequest } from '../dto/bookRequest.dto';
+import { FetchBookListResponse } from '../dto/fetchBookListResponse.dto';
 import { UserMappingBooks } from '../entities/UserMappingBooks.entity';
 import { fetchBookListBySearchKeyword } from '../utilities/axios';
-import { addBookInfo, fetchBookInfo } from '../utilities/es';
+import { addBookInfo } from '../utilities/es';
 
 @Injectable()
 export class BookService {
@@ -16,7 +17,9 @@ export class BookService {
   ) {}
 
   private readonly logger = new Logger(BookService.name);
-  async fetchBookListBySearchKeyword(searchKeyword: string): Promise<any> {
+  async fetchBookListBySearchKeyword(
+    searchKeyword: string,
+  ): Promise<FetchBookListResponse> {
     try {
       const data = await fetchBookListBySearchKeyword(searchKeyword);
       const result = {
@@ -37,9 +40,6 @@ export class BookService {
       });
       return result;
     } catch (error) {
-      if (error instanceof AxiosError) {
-        console.log(error);
-      }
       this.logger.error(error);
       throw new Error(error);
     }
@@ -76,16 +76,7 @@ export class BookService {
     }
   }
 
-  async fetchBestRank(): Promise<any> {
-    try {
-      return await fetchBookInfo();
-    } catch (error) {
-      this.logger.error(error);
-      throw new Error(error);
-    }
-  }
-
-  async addBookReview(request: BookRequest, userUid: number): Promise<any> {
+  async addBookReview(request: BookRequest, userUid: number): Promise<void> {
     try {
       await this.userMappingBooksRepository.save({
         bookId: request.book.id,
@@ -95,7 +86,8 @@ export class BookService {
         emotion: request.review.emotion,
         user: new User(userUid),
       });
-      return await addBookInfo(request);
+      await addBookInfo(request);
+      return;
     } catch (error) {
       this.logger.error(error);
       throw new Error(error);
