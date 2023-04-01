@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { AccessTokenInvalidException } from 'src/exceptions/accessTokenInvalid.exception';
 import { User } from '../../user/entities/user.entity';
 import { Payload } from '../dto/payload.dto';
 import { AuthService } from '../services/auth.service';
@@ -34,7 +35,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       return result;
     } catch (error) {
       this.logger.error(error);
-      throw new Error('Authentication is Invalid.');
+      throw new AccessTokenInvalidException();
     }
   }
 }
