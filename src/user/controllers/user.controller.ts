@@ -77,20 +77,12 @@ export class UserController {
     name: 'current',
     description: '현재 페이지(이 값은 limit에 의존적)',
   })
-  @Get('/')
+  @Get('/search')
   async fetchUser(
     @Query('limit') limit: number,
     @Query('current') current: number,
   ): Promise<User[]> {
     return await this.userService.fetchUser(limit, current);
-  }
-
-  @ApiOperation({ description: '사용할 아이디가 중복인지 검증합니다.' })
-  @Get('/duplicate')
-  async fetchUserDuplicated(
-    @Query('userId') userId: string,
-  ): Promise<{ result: boolean }> {
-    return await this.userService.IsUserExist(userId);
   }
 
   @UseGuards(JwtAuthGuard)
