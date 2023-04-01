@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Query,
@@ -11,6 +13,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Payload } from '../../auth/dto/payload.dto';
 import { UserPayload } from '../../decorators/userPayload.decorator';
 import { BookRequest } from '../dto/bookRequest.dto';
+import { FetchBookListResponse } from '../dto/fetchBookListResponse.dto';
 import { BookService } from '../services/book.service';
 
 @ApiTags('Book')
@@ -23,29 +26,26 @@ export class BookController {
   @Get('/')
   async fetchBookListBySearchKeyword(
     @Query('searchKeyword') searchKeyword: string,
-  ): Promise<any> {
+  ): Promise<FetchBookListResponse> {
     return await this.bookService.fetchBookListBySearchKeyword(searchKeyword);
-  }
-
-  @Get('/rank/fetchBestRank')
-  async fetchBestRank(): Promise<any> {
-    return await this.bookService.fetchBestRank();
   }
 
   @Post('/')
   async addBook(
     @Body() request: BookRequest,
     @UserPayload() userInfo: Payload,
-  ): Promise<any> {
+  ): Promise<void> {
     return await this.bookService.addBookReview(request, userInfo.userUid);
   }
 
   @Post('/review')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async addBookReview(
     @Body() request: BookRequest,
     @UserPayload() userInfo: Payload,
-  ): Promise<any> {
-    return await this.bookService.addBookReview(request, userInfo.userUid);
+  ): Promise<void> {
+    await this.bookService.addBookReview(request, userInfo.userUid);
+    return;
   }
 
   @Delete('/:userMappingBooksUid')
