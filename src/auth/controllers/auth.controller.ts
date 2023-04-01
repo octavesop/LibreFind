@@ -18,6 +18,8 @@ import { AccessTokenConfig } from '../configurations/accessToken.config';
 import { AccessTokenCookieConfig } from '../configurations/accessTokenCookie.config';
 import { RefreshTokenConfig } from '../configurations/refreshToken.config';
 import { RefreshTokenCookieConfig } from '../configurations/refreshTokenCookie.config';
+import { EmailSignRequest } from '../dto/emailSignRequest.dto';
+import { EmailVerifyRequest } from '../dto/emailVerifyRequest.dto';
 import { SignInRequest } from '../dto/signInRequest.dto';
 import { SignUpRequest } from '../dto/signUpRequest.dto';
 import { JwtAuthGuard } from '../guards/jwtAuthGuard.guard';
@@ -43,6 +45,20 @@ export class AuthController {
   @Post('/signUp')
   async signUp(@Body() request: SignUpRequest): Promise<User> {
     return await this.authService.signUp(request);
+  }
+
+  @ApiOperation({ description: '이메일 인증 메일 발송' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('/signUp/email/sign')
+  async signEmail(@Body() request: EmailSignRequest): Promise<void> {
+    return await this.authService.signEmail(request);
+  }
+
+  @ApiOperation({ description: '이메일 인증 이후 계정 활성화' })
+  @HttpCode(HttpStatus.OK)
+  @Post('/signUp/email/verify')
+  async verifyEmail(@Body() request: EmailVerifyRequest): Promise<User> {
+    return await this.authService.verifyEmail(request);
   }
 
   @ApiOperation({ description: '로그인' })
