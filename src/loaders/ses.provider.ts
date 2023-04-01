@@ -1,26 +1,25 @@
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3 } from 'aws-sdk';
+import { SES } from 'aws-sdk';
 
-export const S3_UPLOADER_PROVIDER_NAME = 'S3Uploader';
-export const S3Provider = {
-  provide: S3_UPLOADER_PROVIDER_NAME,
+export const SES_SENDER_PROVIDER_NAME = 'SESSender';
+export const SESProvider = {
+  provide: SES_SENDER_PROVIDER_NAME,
   useFactory: async (configService: ConfigService) => {
-    const logger = new Logger(S3_UPLOADER_PROVIDER_NAME);
+    const logger: Readonly<Logger> = new Logger(SES_SENDER_PROVIDER_NAME);
 
     try {
-      const s3 = new S3({
+      const ses = new SES({
         apiVersion: 'latest',
         accessKeyId: configService.get('AWS_ACCESS_KEY'),
         secretAccessKey: configService.get('AWS_SECRET_KEY'),
         region: configService.get('AWS_REGION'),
-        s3ForcePathStyle: true,
       });
 
-      return s3;
+      return ses;
     } catch (error) {
       logger.error(error);
-      throw new Error(error);
+      throw error;
     }
   },
   inject: [ConfigService],

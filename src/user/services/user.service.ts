@@ -6,11 +6,11 @@ import { AlreadyExistFriendException } from '../../exceptions/alreadyExistFriend
 import { CannotBeFriendWithMyselfException } from '../../exceptions/cannotBeFriendWithMyself.exception';
 import { NotExistFriendException } from '../../exceptions/notExistFriend.exception';
 import { NotExistUserException } from '../../exceptions/notExistUser.exception';
+import { S3ImageUploadHelper } from '../../loaders/s3ImageUploader.helper';
 import { UpdateUserPasswordRequest } from '../dto/updateUserPasswordRequest.dto';
 import { UpdateUserRequest } from '../dto/updateUserRequest.dto';
 import { Friend } from '../entities/friend.entity';
 import { User } from '../entities/user.entity';
-import { S3ImageUploadHelper } from '../helper/s3ImageUploader.helper';
 
 @Injectable()
 export class UserService {

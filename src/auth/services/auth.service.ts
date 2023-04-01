@@ -1,13 +1,18 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { sub } from 'date-fns';
+import { ExpiredCodeException } from 'src/exceptions/expiredCode.exception';
+import { InvalidCodeException } from 'src/exceptions/invalidCode.exception';
 import { NotExistUserException } from 'src/exceptions/notExistUser.exception';
-import { S3ImageUploadHelper } from 'src/user/helper/s3ImageUploader.helper';
+import { S3ImageUploadHelper } from 'src/loaders/s3ImageUploader.helper';
+import { SESSendHelper } from 'src/loaders/sesSend.helper';
 import { Repository } from 'typeorm';
 import { AlreadyExistUserException } from '../../exceptions/alreadyExistUser.exception';
 import { LoginTriedOverFlowException } from '../../exceptions/loginTriedOverflow.exception';
 import { PasswordNotMatchException } from '../../exceptions/passwordNotMatch.exception';
 import { User } from '../../user/entities/user.entity';
+import { EmailSignRequest } from '../dto/emailSignRequest.dto';
+import { EmailVerifyRequest } from '../dto/emailVerifyRequest.dto';
 import { SignInRequest } from '../dto/signInRequest.dto';
 import { SignUpRequest } from '../dto/signUpRequest.dto';
 import { bcryptHash, isHashMatch } from '../utils/hash.util';
@@ -21,6 +26,7 @@ export class AuthService {
     @Inject('RedisProviders')
     private readonly redisProvider,
     private readonly s3ImageUploadHelper: S3ImageUploadHelper,
+    private readonly sesSendHelper: SESSendHelper,
   ) {}
   private readonly logger = new Logger(AuthService.name);
 
@@ -54,6 +60,64 @@ export class AuthService {
     }
   }
 
+  #generateRandomCode(): string {
+    const code = '000000'
+      .split('')
+      .map(() => String(Math.floor(Math.random() * 10)))
+      .join('');
+    return code;
+  }
+
+  async signEmail(request: EmailSignRequest): Promise<void> {
+    try {
+      const code = this.#generateRandomCode();
+      await this.sesSendHelper.sendMail(
+        request.email,
+        'Librefind에서 사용자 인증을 요청합니다.',
+        code,
+      );
+      await this.redisProvider.set(
+        `email:${request.email}`,
+        code,
+        'EX',
+        60 * 20, // 20분
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async verifyEmail(request: EmailVerifyRequest): Promise<User> {
+    try {
+      const codeValue = await this.redisProvider.get(`email:${request.email}`);
+      if (!codeValue) {
+        throw new ExpiredCodeException();
+      }
+      if (codeValue !== request.code) {
+        throw new InvalidCodeException();
+      }
+
+      const user = await this.userRepository.findOne({
+        where: {
+          userEmail: request.email,
+        },
+      });
+
+      if (!user) {
+        throw new NotExistUserException();
+      }
+
+      await this.userRepository.update(user.userUid, { isActivate: true });
+      await this.redisProvider.del(`email:${request.email}`);
+
+      return user;
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
   async findUserByUserUid(userUid: number): Promise<User> {
     try {
       const foundUser = await this.userRepository.findOne({
@@ -80,6 +144,7 @@ export class AuthService {
       const userInfo = await this.userRepository.findOne({
         where: {
           userId: request.userId,
+          isActivate: true,
         },
       });
 
