@@ -46,7 +46,7 @@ export class User {
   @Column({ name: 'agree_marketing_term', default: false })
   agreeMarketingSend: boolean;
 
-  @Column({ name: 'is_activate', default: true })
+  @Column({ name: 'is_activate', default: false })
   isActivate: boolean;
 
   @CreateDateColumn({ name: 'last_logined', default: new Date() })
