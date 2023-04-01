@@ -13,6 +13,7 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { BadgeModule } from './badge/badge.module';
 import { BookModule } from './book/book.module';
 import { HttpExceptionFilter } from './filters/httpException.filter';
+import { LoadersModule } from './loaders/loaders.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -43,6 +44,7 @@ import { UserModule } from './user/user.module';
     }),
     MongooseModule.forRoot(process.env.MONGODB_URL, {}),
     PassportModule,
+    LoadersModule,
 
     AuthModule,
     BadgeModule,
