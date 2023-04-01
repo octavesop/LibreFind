@@ -10,10 +10,12 @@ import { UpdateUserPasswordRequest } from '../dto/updateUserPasswordRequest.dto'
 import { UpdateUserRequest } from '../dto/updateUserRequest.dto';
 import { Friend } from '../entities/friend.entity';
 import { User } from '../entities/user.entity';
+import { S3ImageUploadHelper } from '../helper/s3ImageUploader.helper';
 
 @Injectable()
 export class UserService {
   constructor(
+    private readonly s3ImageUploadHelper: S3ImageUploadHelper,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Friend)
@@ -23,12 +25,17 @@ export class UserService {
 
   async updateUserInfo(
     userUid: number,
+    userId: string,
     request: UpdateUserRequest,
   ): Promise<void> {
     try {
-      // TODO
-      const userProfileImage = null;
-      const updateList = { ...request, userProfileImage: userProfileImage };
+      const userProfileImageDir = request.userProfileImage
+        ? await this.s3ImageUploadHelper.uploadS3Image(
+            request.userProfileImage,
+            userId,
+          )
+        : null;
+      const updateList = { ...request, userProfileImage: userProfileImageDir };
       await this.userRepository.update(userUid, updateList);
       return;
     } catch (error) {
@@ -74,7 +81,7 @@ export class UserService {
       return result.slice((current - 1) * limit, current * limit);
     } catch (error) {
       this.logger.error(error);
-      throw new Error(error);
+      throw error;
     }
   }
 

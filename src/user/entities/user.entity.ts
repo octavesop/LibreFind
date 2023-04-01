@@ -36,6 +36,10 @@ export class User {
 
   @Column({ name: 'user_email', unique: true })
   userEmail: string;
+
+  @Column({ name: 'user_profile_image', default: null })
+  userProfileImage: string;
+
   @Column({ name: 'agree_essential_term', default: false })
   agreeEssentialTerm: boolean;
 

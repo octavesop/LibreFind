@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RedisProviders } from '../loaders/redis.providers';
+import { S3ImageUploadHelper } from 'src/user/helper/s3ImageUploader.helper';
 import { User } from '../user/entities/user.entity';
 import { AccessTokenConfig } from './configurations/accessToken.config';
 import { AccessTokenCookieConfig } from './configurations/accessTokenCookie.config';
@@ -16,7 +16,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   imports: [PassportModule, TypeOrmModule.forFeature([User])],
   controllers: [AuthController],
   providers: [
-    RedisProviders,
     AuthService,
     AccessTokenConfig,
     AccessTokenCookieConfig,
@@ -24,6 +23,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     RefreshTokenCookieConfig,
     JwtService,
     JwtStrategy,
+    S3ImageUploadHelper,
   ],
   exports: [AuthService],
 })

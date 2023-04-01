@@ -40,7 +40,11 @@ export class UserController {
     @UserPayload() userInfo: Payload,
     @Body() request: UpdateUserRequest,
   ): Promise<void> {
-    await this.userService.updateUserInfo(userInfo.userUid, request);
+    await this.userService.updateUserInfo(
+      userInfo.userUid,
+      userInfo.userId,
+      request,
+    );
     return;
   }
 
