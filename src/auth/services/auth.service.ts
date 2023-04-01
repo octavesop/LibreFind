@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { sub } from 'date-fns';
 import { NotExistUserException } from 'src/exceptions/notExistUser.exception';
+import { S3ImageUploadHelper } from 'src/user/helper/s3ImageUploader.helper';
 import { Repository } from 'typeorm';
 import { AlreadyExistUserException } from '../../exceptions/alreadyExistUser.exception';
 import { LoginTriedOverFlowException } from '../../exceptions/loginTriedOverflow.exception';
@@ -19,6 +20,7 @@ export class AuthService {
 
     @Inject('RedisProviders')
     private readonly redisProvider,
+    private readonly s3ImageUploadHelper: S3ImageUploadHelper,
   ) {}
   private readonly logger = new Logger(AuthService.name);
 
@@ -34,9 +36,17 @@ export class AuthService {
         throw new AlreadyExistUserException(request.userId);
       }
 
+      const userProfileImageDir = request.userProfileImage
+        ? await this.s3ImageUploadHelper.uploadS3Image(
+            request.userProfileImage,
+            request.userId,
+          )
+        : null;
+
       return await this.userRepository.save({
         ...request,
         userPw: await bcryptHash(request.userPw),
+        userProfileImage: userProfileImageDir,
       });
     } catch (error) {
       this.logger.error(error);
