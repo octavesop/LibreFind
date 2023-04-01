@@ -45,8 +45,11 @@ export class User {
   @Column({ name: 'is_activate', default: true })
   isActivate: boolean;
 
-  @CreateDateColumn({ name: 'last_logined', default: null })
+  @CreateDateColumn({ name: 'last_logined', default: new Date() })
   lastLogined: Date;
+
+  @CreateDateColumn({ name: 'last_password_changed', default: new Date() })
+  lastPasswordChanged: Date;
 
   @CreateDateColumn({ name: 'created_at', default: new Date() })
   createdAt: Date;

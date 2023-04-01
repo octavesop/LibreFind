@@ -8,14 +8,16 @@ export class AccessTokenCookieConfig implements CookieOptions {
   readonly httpOnly: boolean;
   readonly path: string;
   readonly secure: boolean;
-  readonly sameSite: boolean | 'lax' | 'strict' | 'none';
+  readonly sameSite: 'lax' | 'strict' | 'none';
 
   constructor(private readonly configService: ConfigService) {
-    this.maxAge = this.configService.get<number>('ACCESS_TOKEN_EXPIRES_IN');
-    this.httpOnly = this.configService.get<boolean>('COOKIE_HTTP_ONLY');
-    this.path = this.configService.get<string>('COOKIE_PATH');
-    this.secure = this.configService.get<boolean>('COOKIE_SECURE');
-    this.sameSite = this.configService.get<'lax'>('COOKIE_SAME_SITE');
+    this.maxAge = this.configService.get('ACCESS_TOKEN_EXPIRES_IN');
+    this.httpOnly =
+      this.configService.get('COOKIE_HTTP_ONLY') === true ? true : false;
+    this.path = this.configService.get('COOKIE_PATH');
+    this.secure =
+      this.configService.get('COOKIE_SECURE') === true ? true : false;
+    this.sameSite = this.configService.get('COOKIE_SAME_SITE');
   }
 
   make(): CookieOptions {

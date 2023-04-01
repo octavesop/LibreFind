@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { sub } from 'date-fns';
 import { NotExistUserException } from 'src/exceptions/notExistUser.exception';
 import { Repository } from 'typeorm';
 import { AlreadyExistUserException } from '../../exceptions/alreadyExistUser.exception';
@@ -62,7 +63,9 @@ export class AuthService {
     }
   }
 
-  async signIn(request: SignInRequest): Promise<User> {
+  async signIn(
+    request: SignInRequest,
+  ): Promise<User & { shouldChangePassword: boolean }> {
     try {
       const userInfo = await this.userRepository.findOne({
         where: {
@@ -85,8 +88,11 @@ export class AuthService {
         throw new PasswordNotMatchException(failedCount);
       }
 
+      const userShouldChangePassword =
+        userInfo.lastPasswordChanged < sub(new Date(), { months: 3 });
+
       await this.redisProvider.del('userId');
-      return userInfo;
+      return { ...userInfo, shouldChangePassword: userShouldChangePassword };
     } catch (error) {
       this.logger.error(error);
       throw error;

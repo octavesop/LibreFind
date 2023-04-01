@@ -16,6 +16,12 @@ module.exports = {
   },
   ignorePatterns: ['.eslintrc.js'],
   rules: {
+    'prettier/prettier': [
+      'error',
+      {
+        endOfLine: 'auto',
+      },
+    ],
     'no-console': 'warn', // console.log의 사용을 금함
     'no-throw-literal': 'warn', // throw "e" => throw new Error("e")
     'no-underscore-dangle': 'off', // 변수 및 메소드 이름에 언더바 사용을 금함

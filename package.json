@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs/axios": "^2.0.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
@@ -40,6 +41,7 @@
     "class-validator": "^0.13.2",
     "cookie-parser": "^1.4.6",
     "crypto": "^1.0.1",
+    "date-fns": "^2.29.3",
     "ioredis": "^5.2.3",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.6.1",

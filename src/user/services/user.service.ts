@@ -1,10 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { bcryptHash, isHashMatch } from 'src/auth/utils/hash.util';
 import { Equal, In, Repository } from 'typeorm';
 import { AlreadyExistFriendException } from '../../exceptions/alreadyExistFriend.exception';
 import { CannotBeFriendWithMyselfException } from '../../exceptions/cannotBeFriendWithMyself.exception';
 import { NotExistFriendException } from '../../exceptions/notExistFriend.exception';
 import { NotExistUserException } from '../../exceptions/notExistUser.exception';
+import { UpdateUserPasswordRequest } from '../dto/updateUserPasswordRequest.dto';
+import { UpdateUserRequest } from '../dto/updateUserRequest.dto';
 import { Friend } from '../entities/friend.entity';
 import { User } from '../entities/user.entity';
 
@@ -17,6 +20,53 @@ export class UserService {
     private readonly friendRepository: Repository<Friend>,
   ) {}
   private readonly logger = new Logger(UserService.name);
+
+  async updateUserInfo(
+    userUid: number,
+    request: UpdateUserRequest,
+  ): Promise<void> {
+    try {
+      // TODO
+      const userProfileImage = null;
+      const updateList = { ...request, userProfileImage: userProfileImage };
+      await this.userRepository.update(userUid, updateList);
+      return;
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async checkUserPassword(
+    userUid: number,
+    request: UpdateUserPasswordRequest,
+  ): Promise<{ check: boolean }> {
+    try {
+      const { userPw } = await this.userRepository.findOne({
+        where: {
+          userUid: userUid,
+        },
+      });
+      return { check: await isHashMatch(request.userPassword, userPw) };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async updateUserPassword(
+    userUid: number,
+    request: UpdateUserPasswordRequest,
+  ) {
+    try {
+      await this.userRepository.update(userUid, {
+        userPw: await bcryptHash(request.userPassword),
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
 
   async fetchUser(limit: number, current: number): Promise<User[]> {
     try {
