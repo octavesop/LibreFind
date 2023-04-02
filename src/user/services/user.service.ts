@@ -6,10 +6,10 @@ import { AlreadyExistFriendException } from '../../exceptions/alreadyExistFriend
 import { CannotBeFriendWithMyselfException } from '../../exceptions/cannotBeFriendWithMyself.exception';
 import { NotExistFriendException } from '../../exceptions/notExistFriend.exception';
 import { NotExistUserException } from '../../exceptions/notExistUser.exception';
+import { Friend } from '../../friend/entities/friend.entity';
 import { S3ImageUploadHelper } from '../../loaders/s3ImageUploader.helper';
 import { UpdateUserPasswordRequest } from '../dto/updateUserPasswordRequest.dto';
 import { UpdateUserRequest } from '../dto/updateUserRequest.dto';
-import { Friend } from '../entities/friend.entity';
 import { User } from '../entities/user.entity';
 
 @Injectable()
@@ -91,7 +91,7 @@ export class UserService {
     current: number,
   ): Promise<User[]> {
     const friendEntityList = await this.friendRepository.findBy({
-      userUid: Equal(userUid),
+      user: Equal(userUid),
     });
     const friendResult = await this.userRepository.find({
       where: {
@@ -118,9 +118,8 @@ export class UserService {
       const isFriendExist = await this.friendRepository.find({
         where: [
           {
-            userUid: Equal(userUid),
+            user: Equal(userUid),
             userFriendUid: friendUser.userUid,
-            relation: 'friend',
           },
         ],
       });
@@ -128,8 +127,8 @@ export class UserService {
         throw new AlreadyExistFriendException();
       }
       await this.friendRepository.save([
-        new Friend(userUid, userFriendUid, 'friend'),
-        new Friend(userFriendUid, userUid, 'friend'),
+        new Friend(userUid, userFriendUid),
+        new Friend(userFriendUid, userUid),
       ]);
       return;
     } catch (error) {
@@ -152,14 +151,12 @@ export class UserService {
       const friendEntity = await this.friendRepository.find({
         where: [
           {
-            userUid: Equal(userUid),
+            user: Equal(userUid),
             userFriendUid: Equal(userFriendUid),
-            relation: 'friend',
           },
           {
-            userUid: Equal(userFriendUid),
+            user: Equal(userFriendUid),
             userFriendUid: Equal(userUid),
-            relation: 'friend',
           },
         ],
       });
