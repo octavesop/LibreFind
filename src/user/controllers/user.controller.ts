@@ -1,11 +1,9 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   Post,
   Put,
   Query,
@@ -87,41 +85,5 @@ export class UserController {
     @Query('current') current: number,
   ): Promise<User[]> {
     return await this.userService.fetchUser(limit, current);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('/friend')
-  async fetchFriends(
-    @UserPayload() userInfo: Payload,
-    @Query('limit') limit: number,
-    @Query('current') current: number,
-  ): Promise<User[]> {
-    return await this.userService.fetchFriends(
-      userInfo.userUid,
-      limit,
-      current,
-    );
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.CREATED)
-  @Post('/friend/:userFriendUid')
-  async addFriend(
-    @UserPayload() userInfo: Payload,
-    @Param('userFriendUid') userFriendUid: number,
-  ): Promise<void> {
-    await this.userService.addFriend(userInfo.userUid, userFriendUid);
-    return;
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete('/friend/:userFriendUid')
-  async deleteFriend(
-    @UserPayload() userInfo: Payload,
-    @Param('userFriendUid') userFriendUid: number,
-  ): Promise<void> {
-    await this.userService.deleteFriend(userInfo.userUid, userFriendUid);
-    return;
   }
 }

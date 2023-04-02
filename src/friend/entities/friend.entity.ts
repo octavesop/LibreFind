@@ -6,35 +6,27 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
-  UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity({ name: 'FRIEND' })
-@Unique(['userUid', 'userFriendUid', 'relation'])
+@Unique(['user', 'userFriendUid'])
 export class Friend {
-  constructor(userUid: number, userFriendUid: number, relation: string) {
+  constructor(userUid: number, userFriendUid: number) {
     this.friendUid = 0;
-    this.userUid = new User(userUid);
+    this.user = new User(userUid);
     this.userFriendUid = userFriendUid;
-    this.relation = relation;
   }
   @PrimaryGeneratedColumn({ name: 'friend_uid' })
   friendUid: number;
 
-  @Column({ name: 'relation', default: 'friend' })
-  relation: string;
+  @Column({ name: 'user_friend_uid' })
+  userFriendUid: number; // 항상 더 큰 uid가 이곳으로 들어온다.
 
   @CreateDateColumn({ name: 'created_at', default: new Date() })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', default: new Date() })
-  updatedAt: Date;
-
   @ManyToOne(() => User, (user) => user.userUid)
   @JoinColumn({ name: 'user_uid' })
-  userUid: User;
-
-  @Column({ name: 'user_friend_uid' })
-  userFriendUid: number;
+  user: User;
 }

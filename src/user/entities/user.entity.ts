@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { BadgeMappingUser } from '../../badge/entities/badge.entity';
 import { UserMappingBooks } from '../../book/entities/userMappingBooks.entity';
-import { Friend } from './friend.entity';
+import { Friend } from '../../friend/entities/friend.entity';
 
 @Entity({ name: 'USER' })
 export class User {
@@ -71,7 +71,7 @@ export class User {
   @JoinColumn({ name: 'user_mapping_books_id' })
   userMappingBooks: UserMappingBooks[];
 
-  @OneToMany(() => Friend, (friend) => friend.userUid)
+  @OneToMany(() => Friend, (friend) => friend.user)
   @JoinColumn({ name: 'user_mapping_books_id' })
   friendUid: Friend[];
 
