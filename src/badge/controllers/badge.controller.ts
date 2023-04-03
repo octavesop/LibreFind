@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Badge } from '../schemas/badge.schema';
 import { BadgeService } from '../services/badge.service';
 
-@ApiTags('Badge')
+@ApiTags('Badge - 배지')
 @Controller('/badge')
 export class BadgeController {
   constructor(private readonly badgeService: BadgeService) {}

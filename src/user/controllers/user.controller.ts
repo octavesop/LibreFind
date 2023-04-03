@@ -18,7 +18,7 @@ import { UpdateUserRequest } from '../dto/updateUserRequest.dto';
 import { User } from '../entities/user.entity';
 import { UserService } from '../services/user.service';
 
-@ApiTags('User')
+@ApiTags('User - 사용자')
 @Controller('/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
