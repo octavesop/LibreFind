@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { UserMappingGenre } from './userMappingGenre.entity';
 
 @Entity({ name: 'GENRE' })
 export class Genre {
@@ -10,4 +18,14 @@ export class Genre {
 
   @Column({ name: 'genre_name', unique: true })
   genreName: string;
+
+  @CreateDateColumn({ name: 'created_at', default: new Date() })
+  createdAt: Date;
+
+  @OneToMany(
+    () => UserMappingGenre,
+    (userMappingGenre) => userMappingGenre.genre,
+  )
+  @JoinColumn({ name: 'user_mapping_genre_id' })
+  userMappingGenre: UserMappingGenre[];
 }
