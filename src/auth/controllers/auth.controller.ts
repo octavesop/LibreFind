@@ -25,7 +25,7 @@ import { SignUpRequest } from '../dto/signUpRequest.dto';
 import { JwtAuthGuard } from '../guards/jwtAuthGuard.guard';
 import { AuthService } from '../services/auth.service';
 
-@ApiTags('Auth')
+@ApiTags('Auth - 가입, 로그인/로그아웃, 인증')
 @Controller('/auth')
 export class AuthController {
   constructor(

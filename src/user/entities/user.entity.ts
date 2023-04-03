@@ -1,4 +1,5 @@
 import { Exclude } from 'class-transformer';
+import { UserMappingGenre } from 'src/genre/entities/userMappingGenre.entity';
 import {
   Column,
   CreateDateColumn,
@@ -72,7 +73,7 @@ export class User {
   userMappingBooks: UserMappingBooks[];
 
   @OneToMany(() => Friend, (friend) => friend.user)
-  @JoinColumn({ name: 'user_mapping_books_id' })
+  @JoinColumn({ name: 'friend_uid' })
   friendUid: Friend[];
 
   @OneToMany(
@@ -81,4 +82,11 @@ export class User {
   )
   @JoinColumn({ name: 'badge_mapping_user_uid' })
   badgeMappingUserUid: BadgeMappingUser[];
+
+  @OneToMany(
+    () => UserMappingGenre,
+    (userMappingGenre) => userMappingGenre.user,
+  )
+  @JoinColumn({ name: 'user_mapping_genre_id' })
+  userMappingGenre: UserMappingGenre[];
 }

@@ -16,7 +16,7 @@ import { BookRequest } from '../dto/bookRequest.dto';
 import { FetchBookListResponse } from '../dto/fetchBookListResponse.dto';
 import { BookService } from '../services/book.service';
 
-@ApiTags('Book')
+@ApiTags('Book - 책')
 @Controller('/book')
 export class BookController {
   constructor(private readonly bookService: BookService) {}

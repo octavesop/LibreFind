@@ -14,6 +14,7 @@ import { BadgeModule } from './badge/badge.module';
 import { BookModule } from './book/book.module';
 import { HttpExceptionFilter } from './filters/httpException.filter';
 import { FriendModule } from './friend/friend.module';
+import { GenreModule } from './genre/genre.module';
 import { LoadersModule } from './loaders/loaders.module';
 import { UserModule } from './user/user.module';
 
@@ -50,8 +51,9 @@ import { UserModule } from './user/user.module';
     AuthModule,
     BadgeModule,
     BookModule,
-    UserModule,
     FriendModule,
+    GenreModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [

@@ -9,12 +9,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Payload } from 'src/auth/dto/payload.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwtAuthGuard.guard';
 import { UserPayload } from 'src/decorators/userPayload.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { FriendService } from '../services/friend.service';
 
+@ApiTags('Friend - 친구')
 @Controller('/friend')
 export class FriendController {
   constructor(private readonly friendService: FriendService) {}

@@ -18,7 +18,7 @@ import { UpdateUserRequest } from '../dto/updateUserRequest.dto';
 import { User } from '../entities/user.entity';
 import { UserService } from '../services/user.service';
 
-@ApiTags('User')
+@ApiTags('User - 사용자')
 @Controller('/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -31,6 +31,7 @@ export class UserController {
     return await this.userService.IsUserExist(userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ description: '사용자의 정보를 변경합니다.' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put('/')
@@ -46,6 +47,7 @@ export class UserController {
     return;
   }
 
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     description:
       '사용자의 비밀번호를 확인합니다. 해당 api는 중요 정보 접근 및 변경에 활용됩니다.',
@@ -58,6 +60,7 @@ export class UserController {
     return await this.userService.checkUserPassword(userInfo.userUid, request);
   }
 
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ description: '사용자의 비밀번호를 변경합니다.' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put('/password')
