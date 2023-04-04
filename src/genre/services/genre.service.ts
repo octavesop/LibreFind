@@ -76,7 +76,7 @@ export class GenreService {
   async updateCurrentUserPreferGenre(
     userUid: number,
     request: AddPreferGenreRequest,
-  ): Promise<any> {
+  ): Promise<void> {
     try {
       const requestGenreUidCount = await this.genreRepository.count({
         where: {
@@ -112,6 +112,7 @@ export class GenreService {
           }),
         );
       }
+      return;
     } catch (error) {
       this.logger.error(error);
       throw error;
