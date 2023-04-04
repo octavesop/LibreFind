@@ -92,7 +92,7 @@ export class User {
   userMappingGenre: UserMappingGenre[];
 
   @OneToMany(
-    () => UserMappingGenre,
+    () => UserMappingEmotion,
     (userMappingEmotion) => userMappingEmotion.user,
   )
   @JoinColumn({ name: 'user_mapping_emotion_id' })
