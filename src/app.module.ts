@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { BadgeModule } from './badge/badge.module';
 import { BookModule } from './book/book.module';
+import { EmotionModule } from './emotion/emotion.module';
 import { HttpExceptionFilter } from './filters/httpException.filter';
 import { FriendModule } from './friend/friend.module';
 import { GenreModule } from './genre/genre.module';
@@ -51,6 +52,7 @@ import { UserModule } from './user/user.module';
     AuthModule,
     BadgeModule,
     BookModule,
+    EmotionModule,
     FriendModule,
     GenreModule,
     UserModule,
