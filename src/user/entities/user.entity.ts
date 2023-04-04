@@ -1,4 +1,5 @@
 import { Exclude } from 'class-transformer';
+import { UserMappingEmotion } from 'src/emotion/entities/userMappingEmotion.entity';
 import { UserMappingGenre } from 'src/genre/entities/userMappingGenre.entity';
 import {
   Column,
@@ -89,4 +90,11 @@ export class User {
   )
   @JoinColumn({ name: 'user_mapping_genre_id' })
   userMappingGenre: UserMappingGenre[];
+
+  @OneToMany(
+    () => UserMappingGenre,
+    (userMappingEmotion) => userMappingEmotion.user,
+  )
+  @JoinColumn({ name: 'user_mapping_emotion_id' })
+  userMappingEmotion: UserMappingEmotion[];
 }

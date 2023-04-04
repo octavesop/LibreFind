@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -18,25 +20,23 @@ import { UserMappingGenre } from '../entities/userMappingGenre.entity';
 import { GenreService } from '../services/genre.service';
 
 @ApiTags('Genre - 장르')
+@UseGuards(JwtAuthGuard)
 @Controller('/genre')
 export class GenreController {
   constructor(private readonly genreService: GenreService) {}
 
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ description: '전체 장르 분류를 가져옵니다.' })
   @Get('/')
   async fetchGenreList(): Promise<Genre[]> {
     return await this.genreService.fetchGenreList();
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ description: '새로운 장르를 추가합니다.' })
   @Post('/')
   async addGenre(@Body() request: AddGenreRequest): Promise<Genre> {
     return await this.genreService.addGenre(request);
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ description: '현재 사용자가 선호하는 장르를 가져옵니다.' })
   @Get('/user/me')
   async fetchCurrentUserPreferGenre(
@@ -45,7 +45,6 @@ export class GenreController {
     return await this.genreService.fetchUserPreferGenre(userInfo.userUid);
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ description: '특정 사용자가 선호하는 장르를 가져옵니다.' })
   @Get('/user/:userUid')
   async fetchUserPreferGenre(
@@ -54,13 +53,13 @@ export class GenreController {
     return await this.genreService.fetchUserPreferGenre(userUid);
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ description: '현재 사용자가 선호하는 장르를 추가합니다.' })
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Put('/user/me')
   async updateCurrentUserPreferGenre(
     @UserPayload() userInfo: Payload,
     @Body() request: AddPreferGenreRequest,
-  ): Promise<any> {
+  ): Promise<void> {
     return await this.genreService.updateCurrentUserPreferGenre(
       userInfo.userUid,
       request,
