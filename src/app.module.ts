@@ -17,6 +17,7 @@ import { HttpExceptionFilter } from './filters/httpException.filter';
 import { FriendModule } from './friend/friend.module';
 import { GenreModule } from './genre/genre.module';
 import { LoadersModule } from './loaders/loaders.module';
+import { ReviewModule } from './review/review.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -55,6 +56,7 @@ import { UserModule } from './user/user.module';
     EmotionModule,
     FriendModule,
     GenreModule,
+    ReviewModule,
     UserModule,
   ],
   controllers: [AppController],

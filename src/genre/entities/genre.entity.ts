@@ -1,3 +1,4 @@
+import { Review } from 'src/review/entities/review.entity';
 import {
   Column,
   CreateDateColumn,
@@ -6,7 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserMappingGenre } from './userMappingGenre.entity';
+import { UserPreferGenre } from './userMappingGenre.entity';
 
 @Entity({ name: 'GENRE' })
 export class Genre {
@@ -23,9 +24,13 @@ export class Genre {
   createdAt: Date;
 
   @OneToMany(
-    () => UserMappingGenre,
+    () => UserPreferGenre,
     (userMappingGenre) => userMappingGenre.genre,
   )
   @JoinColumn({ name: 'user_mapping_genre_id' })
-  userMappingGenre: UserMappingGenre[];
+  userMappingGenre: UserPreferGenre[];
+
+  @OneToMany(() => Review, (review) => review.genre)
+  @JoinColumn({ name: 'review_uid' })
+  review: Review[];
 }

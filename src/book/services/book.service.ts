@@ -2,12 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios, { AxiosError } from 'axios';
 import { Equal, Repository } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { BookRequest } from '../dto/bookRequest.dto';
+import { BookEsRawResponse } from '../dto/bookEsRawResponse.dto';
 import { FetchBookListResponse } from '../dto/fetchBookListResponse.dto';
 import { UserMappingBooks } from '../entities/UserMappingBooks.entity';
 import { fetchBookListBySearchKeyword } from '../utilities/axios';
-import { addBookInfo } from '../utilities/es';
 
 @Injectable()
 export class BookService {
@@ -35,13 +33,53 @@ export class BookService {
           };
         }),
       };
-      result.result.forEach(async (v) => {
-        await this.#addBookOnEs(v);
-      });
-      return result;
+      await Promise.all(
+        result.result.map(async (v) => {
+          await this.#addBookOnEs(v);
+        }),
+      );
+      return await this.esSearchByIsbn(result.result.map((v) => v.isbn));
     } catch (error) {
       this.logger.error(error);
       throw new Error(error);
+    }
+  }
+
+  async esSearchByIsbn(isbn: string[]): Promise<FetchBookListResponse> {
+    try {
+      const rawResult: BookEsRawResponse = (
+        await axios.post(`${process.env.ES_URL}/_search`, {
+          query: {
+            bool: {
+              must: [
+                {
+                  terms: {
+                    isbn: isbn,
+                  },
+                },
+              ],
+            },
+          },
+        })
+      ).data;
+      const result = rawResult.hits.hits.map((v) => {
+        return {
+          _id: v._id,
+          title: v._source.title,
+          author: v._source.author,
+          publisher: v._source.publisher,
+          imageUrl: v._source.imageUrl,
+          isbn: v._source.isbn,
+          reviewed: v._source.reviewed,
+        };
+      });
+      return {
+        total: result.length,
+        result: result,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
     }
   }
 
@@ -59,13 +97,15 @@ export class BookService {
         .catch(async (error) => {
           if (error instanceof AxiosError) {
             if (error.response.status == 404) {
-              this.logger.verbose(
-                `${request.title}(isbn: ${request.isbn})은 존재하지 않는 데이터이므로 추가합니다.`,
-              );
               await axios.put(`${process.env.ES_URL}/_doc/${request.id}`, {
                 ...request,
-                reviewed: 0,
+                genre: [],
+                emotion: [],
+                rate: 0,
               });
+              this.logger.verbose(
+                `${request.title}(isbn: ${request.isbn})은 존재하지 않는 데이터이므로 추가되었습니다.`,
+              );
             }
           }
         });
@@ -73,24 +113,6 @@ export class BookService {
     } catch (error) {
       this.logger.error(error);
       throw error;
-    }
-  }
-
-  async addBookReview(request: BookRequest, userUid: number): Promise<void> {
-    try {
-      await this.userMappingBooksRepository.save({
-        bookId: request.book.id,
-        bookName: request.book.titleInfo,
-        review: request.review.review,
-        rate: request.review.rate,
-        emotion: request.review.emotion,
-        user: new User(userUid),
-      });
-      await addBookInfo(request);
-      return;
-    } catch (error) {
-      this.logger.error(error);
-      throw new Error(error);
     }
   }
 

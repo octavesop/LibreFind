@@ -8,7 +8,7 @@ import { Equal, In, Repository } from 'typeorm';
 import { AddGenreRequest } from '../dtos/addGenreRequest.dto';
 import { AddPreferGenreRequest } from '../dtos/addPreferGenreRequest.dto';
 import { Genre } from '../entities/genre.entity';
-import { UserMappingGenre } from '../entities/userMappingGenre.entity';
+import { UserPreferGenre } from '../entities/userMappingGenre.entity';
 
 @Injectable()
 export class GenreService {
@@ -17,8 +17,8 @@ export class GenreService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Genre)
     private readonly genreRepository: Repository<Genre>,
-    @InjectRepository(UserMappingGenre)
-    private readonly userMappingGenreRepository: Repository<UserMappingGenre>,
+    @InjectRepository(UserPreferGenre)
+    private readonly userMappingGenreRepository: Repository<UserPreferGenre>,
   ) {}
   private readonly logger = new Logger(GenreService.name);
 
@@ -51,7 +51,7 @@ export class GenreService {
     }
   }
 
-  async fetchUserPreferGenre(userUid: number): Promise<UserMappingGenre[]> {
+  async fetchUserPreferGenre(userUid: number): Promise<UserPreferGenre[]> {
     try {
       const isUserExist = await this.userRepository.findOne({
         where: {
@@ -108,7 +108,7 @@ export class GenreService {
       if (insertGenreList.length > 0) {
         await this.userMappingGenreRepository.save(
           insertGenreList.map((genreUid) => {
-            return new UserMappingGenre(genreUid, userUid);
+            return new UserPreferGenre(genreUid, userUid);
           }),
         );
       }

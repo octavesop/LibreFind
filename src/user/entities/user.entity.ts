@@ -1,6 +1,8 @@
 import { Exclude } from 'class-transformer';
 import { UserMappingEmotion } from 'src/emotion/entities/userMappingEmotion.entity';
-import { UserMappingGenre } from 'src/genre/entities/userMappingGenre.entity';
+import { UserPreferGenre } from 'src/genre/entities/userMappingGenre.entity';
+import { Agree } from 'src/review/entities/agree.entity';
+import { Review } from 'src/review/entities/review.entity';
 import {
   Column,
   CreateDateColumn,
@@ -84,17 +86,22 @@ export class User {
   @JoinColumn({ name: 'badge_mapping_user_uid' })
   badgeMappingUserUid: BadgeMappingUser[];
 
-  @OneToMany(
-    () => UserMappingGenre,
-    (userMappingGenre) => userMappingGenre.user,
-  )
-  @JoinColumn({ name: 'user_mapping_genre_id' })
-  userMappingGenre: UserMappingGenre[];
+  @OneToMany(() => UserPreferGenre, (userMappingGenre) => userMappingGenre.user)
+  @JoinColumn({ name: 'user_prefer_genre_id' })
+  userPreferGenre: UserPreferGenre[];
 
   @OneToMany(
-    () => UserMappingGenre,
+    () => UserMappingEmotion,
     (userMappingEmotion) => userMappingEmotion.user,
   )
   @JoinColumn({ name: 'user_mapping_emotion_id' })
   userMappingEmotion: UserMappingEmotion[];
+
+  @OneToMany(() => Agree, (like) => like.user)
+  @JoinColumn({ name: 'like_uid' })
+  agree: Agree[];
+
+  @OneToMany(() => Review, (review) => review.user)
+  @JoinColumn({ name: 'review_uid' })
+  review: Review;
 }
