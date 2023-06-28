@@ -16,7 +16,7 @@ import { UserPayload } from 'src/decorators/userPayload.decorator';
 import { AddGenreRequest } from '../dtos/addGenreRequest.dto';
 import { AddPreferGenreRequest } from '../dtos/addPreferGenreRequest.dto';
 import { Genre } from '../entities/genre.entity';
-import { UserMappingGenre } from '../entities/userMappingGenre.entity';
+import { UserPreferGenre } from '../entities/userMappingGenre.entity';
 import { GenreService } from '../services/genre.service';
 
 @ApiTags('Genre - 장르')
@@ -41,7 +41,7 @@ export class GenreController {
   @Get('/user/me')
   async fetchCurrentUserPreferGenre(
     @UserPayload() userInfo: Payload,
-  ): Promise<UserMappingGenre[]> {
+  ): Promise<UserPreferGenre[]> {
     return await this.genreService.fetchUserPreferGenre(userInfo.userUid);
   }
 
@@ -49,7 +49,7 @@ export class GenreController {
   @Get('/user/:userUid')
   async fetchUserPreferGenre(
     @Param('userUid') userUid: number,
-  ): Promise<UserMappingGenre[]> {
+  ): Promise<UserPreferGenre[]> {
     return await this.genreService.fetchUserPreferGenre(userUid);
   }
 

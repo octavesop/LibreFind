@@ -1,3 +1,4 @@
+import { Review } from 'src/review/entities/review.entity';
 import {
   Column,
   CreateDateColumn,
@@ -28,4 +29,8 @@ export class Emotion {
   )
   @JoinColumn({ name: 'user_mapping_emotion_id' })
   userMappingEmotion: UserMappingEmotion[];
+
+  @OneToMany(() => Review, (review) => review.emotion)
+  @JoinColumn({ name: 'review_uid' })
+  review: Review[];
 }

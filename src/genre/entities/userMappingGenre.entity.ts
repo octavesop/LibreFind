@@ -8,20 +8,20 @@ import {
 } from 'typeorm';
 import { Genre } from './genre.entity';
 
-@Entity({ name: 'USER_MAPPING_GENRE' })
-export class UserMappingGenre {
+@Entity({ name: 'USER_PREFER_GENRE' })
+export class UserPreferGenre {
   constructor(genreUid: number, userUid: number) {
     this.genre = new Genre(genreUid);
     this.user = new User(userUid);
   }
-  @PrimaryGeneratedColumn({ name: 'user_mapping_genre_uid' })
-  userMappingGenreUid: number;
+  @PrimaryGeneratedColumn({ name: 'user_prefer_genre_uid' })
+  userPreferGenreUid: number;
 
   @ManyToOne(() => Genre, (genre) => genre.userMappingGenre)
   @JoinColumn({ name: 'genre_uid' })
   genre: Genre;
 
-  @ManyToOne(() => User, (user) => user.userMappingGenre)
+  @ManyToOne(() => User, (user) => user.userPreferGenre)
   @JoinColumn({ name: 'user_uid' })
   user: User;
 
