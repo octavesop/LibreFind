@@ -15,6 +15,7 @@ import { Payload } from 'src/auth/dto/payload.dto';
 import { UserPayload } from 'src/decorators/userPayload.decorator';
 import { AddReviewRequest } from '../dto/addReviewRequest.dto';
 import { UpdateListRequest } from '../dto/updateLikeRequest.dto';
+import { Agree } from '../entities/agree.entity';
 import { Review } from '../entities/review.entity';
 import { ReviewService } from '../services/review.service';
 
@@ -68,17 +69,18 @@ export class ReviewController {
   async addReview(
     @Body() request: AddReviewRequest,
     @UserPayload() userInfo: Payload,
-  ): Promise<any> {
+  ): Promise<Review> {
     return await this.reviewService.addReview(request, userInfo.userUid);
   }
 
   @ApiOperation({ description: '기존 리뷰를 수정합니다.' })
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Put('/:reviewUid')
   async updateReview(
     @Param('reviewUid') reviewUid: number,
     @Body() request: AddReviewRequest,
     @UserPayload() userInfo: Payload,
-  ): Promise<any> {
+  ): Promise<void> {
     return await this.reviewService.updateReview(
       reviewUid,
       request,
@@ -101,7 +103,9 @@ export class ReviewController {
     description: '특정 리뷰에 좋아요한 사용자 리스트를 가져옵니다.',
   })
   @Get('/like/:reviewUid')
-  async fetchLikeOnReview(@Param('reviewUid') reviewUid: number): Promise<any> {
+  async fetchLikeOnReview(
+    @Param('reviewUid') reviewUid: number,
+  ): Promise<Agree[]> {
     return await this.reviewService.fetchLikeOnReview(reviewUid);
   }
 
