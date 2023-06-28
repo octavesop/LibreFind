@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { updateEsBook } from 'src/book/utilities/es';
 import { Emotion } from 'src/emotion/entities/emotion.entity';
+import { AlreadyExistAgreeException } from 'src/exceptions/alreadyExistAgree.exception';
 import { AlreadyExistReviewException } from 'src/exceptions/alreadyExistReview.exception';
 import { CannotAgreeMyReviewException } from 'src/exceptions/cannotAgreeMyReview.exception';
 import { NotExistReviewException } from 'src/exceptions/notExistReview.exception';
@@ -81,11 +82,20 @@ export class ReviewService {
         if (!reviewEntity) {
           throw new NotExistReviewException();
         }
-        if (reviewEntity.user.userUid === userUid) {
+        if (reviewEntity.user.userUid == userUid) {
           throw new CannotAgreeMyReviewException();
         }
+        if (
+          this.agreeRepository.findOne({
+            where: {
+              review: Equal(reviewUid),
+              user: Equal(userUid),
+            },
+          })
+        ) {
+          throw new AlreadyExistAgreeException();
+        }
         await this.agreeRepository.save({
-          agreeUid: 0,
           review: new Review(reviewUid),
           user: new User(userUid),
         });
@@ -98,7 +108,6 @@ export class ReviewService {
         });
         await this.agreeRepository.delete(deleteAgreeEntity.agreeUid);
       }
-
       return;
     } catch (error) {
       this.logger.error(error);
@@ -110,6 +119,7 @@ export class ReviewService {
     try {
       return await this.agreeRepository.find({
         where: { review: Equal(reviewUid) },
+        relations: ['user'],
       });
     } catch (error) {
       this.logger.error(error);
@@ -166,20 +176,20 @@ export class ReviewService {
     reviewUid: number,
     request: UpdateReviewRequest,
     userUid: number,
-  ): Promise<any> {
+  ): Promise<void> {
     try {
       const foundReview = await this.#isReviewExist(reviewUid, userUid);
       if (!foundReview) {
         throw new NotExistReviewException();
       }
-      return await this.reviewRepository.update(foundReview.reviewUid, request);
+      await this.reviewRepository.update(foundReview.reviewUid, request);
     } catch (error) {
       this.logger.error(error);
       throw error;
     }
   }
 
-  async deleteReview(reviewUid: number, userUid: number): Promise<any> {
+  async deleteReview(reviewUid: number, userUid: number): Promise<void> {
     try {
       const foundReview = await this.#isReviewExist(reviewUid, userUid);
       if (!foundReview) {
